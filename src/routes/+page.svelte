@@ -143,118 +143,143 @@
 	);
 </script>
 
-<div class="container">
-	<div class="header">
-		<h2>현재 열려있는 포트</h2>
-		<div class="actions">
-			<button on:click={findAvailablePort} disabled={findingPort} class="btn-secondary">
+<div class="bg-white rounded-lg p-8 shadow-sm">
+	<div class="flex justify-between items-center mb-6">
+		<h2 class="text-2xl font-semibold text-slate-700">현재 열려있는 포트</h2>
+		<div class="flex gap-2">
+			<button
+				on:click={findAvailablePort}
+				disabled={findingPort}
+				class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 disabled:opacity-60 disabled:cursor-not-allowed font-medium transition"
+			>
 				{findingPort ? '검색 중...' : '사용 가능한 포트 찾기'}
 			</button>
-			<button on:click={loadPorts} disabled={loading} class="btn-primary">
+			<button
+				on:click={loadPorts}
+				disabled={loading}
+				class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed font-medium transition"
+			>
 				{loading ? '로딩 중...' : '새로고침'}
 			</button>
 		</div>
 	</div>
 
 	{#if availablePort}
-		<div class="alert success">
+		<div class="p-4 bg-green-50 text-green-800 border border-green-200 rounded mb-4">
 			사용 가능한 포트: <strong>{availablePort}</strong>
 		</div>
 	{/if}
 
 	{#if success}
-		<div class="alert success">{success}</div>
+		<div class="p-4 bg-green-50 text-green-800 border border-green-200 rounded mb-4">{success}</div>
 	{/if}
 
 	{#if error}
-		<div class="alert error">{error}</div>
+		<div class="p-4 bg-red-50 text-red-800 border border-red-200 rounded mb-4">{error}</div>
 	{/if}
 
-	<div class="search-box">
+	<div class="mb-4">
 		<input
 			type="text"
 			placeholder="포트 번호, 프로토콜, 프로세스, 설명으로 검색..."
 			bind:value={searchTerm}
+			class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 		/>
 	</div>
 
 	{#if loading}
-		<div class="loading">포트 정보를 불러오는 중...</div>
+		<div class="text-center py-12 text-gray-500">포트 정보를 불러오는 중...</div>
 	{:else if filteredPorts.length === 0}
-		<div class="empty">
+		<div class="text-center py-12 text-gray-500">
 			{searchTerm ? '검색 결과가 없습니다' : '열려있는 포트가 없습니다'}
 		</div>
 	{:else}
-		<div class="table-container">
-			<table>
-				<thead>
+		<div class="overflow-x-auto">
+			<table class="w-full border-collapse">
+				<thead class="bg-gray-50">
 					<tr>
-						<th>포트</th>
-						<th>프로토콜</th>
-						<th>상태</th>
-						<th>프로세스</th>
-						<th>설명</th>
-						<th>작업</th>
+						<th class="text-left p-4 font-semibold text-slate-700 border-b-2 border-gray-200">포트</th>
+						<th class="text-left p-4 font-semibold text-slate-700 border-b-2 border-gray-200">프로토콜</th>
+						<th class="text-left p-4 font-semibold text-slate-700 border-b-2 border-gray-200">상태</th>
+						<th class="text-left p-4 font-semibold text-slate-700 border-b-2 border-gray-200">프로세스</th>
+						<th class="text-left p-4 font-semibold text-slate-700 border-b-2 border-gray-200">설명</th>
+						<th class="text-left p-4 font-semibold text-slate-700 border-b-2 border-gray-200">작업</th>
 					</tr>
 				</thead>
 				<tbody>
 					{#each filteredPorts as port}
-						<tr class:editing={editingPort === port.port}>
-							<td class="port">
-								<button class="port-link" on:click={() => openPort(port)}>
+						<tr class="hover:bg-gray-50 transition {editingPort === port.port ? 'bg-blue-50' : ''}">
+							<td class="p-4 border-b border-gray-200">
+								<button
+									on:click={() => openPort(port)}
+									class="text-blue-500 font-semibold font-mono underline hover:text-blue-700 transition"
+								>
 									{port.port}
 								</button>
 							</td>
-							<td>{port.protocol.toUpperCase()}</td>
-							<td>
-								<span class="status {port.state}">{port.state === 'open' ? '열림' : '닫힘'}</span>
+							<td class="p-4 border-b border-gray-200">{port.protocol.toUpperCase()}</td>
+							<td class="p-4 border-b border-gray-200">
+								<span class="px-3 py-1 rounded-full text-sm font-medium {port.state === 'open' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+									{port.state === 'open' ? '열림' : '닫힘'}
+								</span>
 							</td>
-							<td>
+							<td class="p-4 border-b border-gray-200">
 								{#if port.processName}
-									<span class="process-name">{port.processName}</span>
+									<span class="font-medium text-slate-700">{port.processName}</span>
 									{#if port.pid}
-										<span class="pid">(PID: {port.pid})</span>
+										<span class="ml-1 text-gray-500 text-sm">(PID: {port.pid})</span>
 									{/if}
 								{:else}
 									-
 								{/if}
 							</td>
-							<td>
+							<td class="p-4 border-b border-gray-200">
 								{#if editingPort === port.port}
-									<div class="edit-form">
+									<div class="flex flex-col gap-2 min-w-[200px]">
 										<input
 											type="text"
 											placeholder="설명 입력..."
 											bind:value={editForm.description}
-											class="edit-input"
+											class="px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
 										/>
 										<input
 											type="text"
 											placeholder="URL (선택사항)"
 											bind:value={editForm.url}
-											class="edit-input"
+											class="px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
 										/>
 									</div>
 								{:else}
-									<span class="description">{port.description || '-'}</span>
+									<span class="text-gray-600 italic">{port.description || '-'}</span>
 								{/if}
 							</td>
-							<td>
+							<td class="p-4 border-b border-gray-200">
 								{#if editingPort === port.port}
-									<div class="action-buttons">
-										<button class="btn-small btn-success" on:click={() => saveDescription(port.port)}>
+									<div class="flex gap-2 flex-wrap">
+										<button
+											class="px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition"
+											on:click={() => saveDescription(port.port)}
+										>
 											저장
 										</button>
-										<button class="btn-small btn-secondary" on:click={cancelEdit}>취소</button>
+										<button
+											class="px-3 py-1 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 transition"
+											on:click={cancelEdit}
+										>
+											취소
+										</button>
 									</div>
 								{:else}
-									<div class="action-buttons">
-										<button class="btn-small btn-primary" on:click={() => startEditPort(port)}>
+									<div class="flex gap-2 flex-wrap">
+										<button
+											class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+											on:click={() => startEditPort(port)}
+										>
 											{port.description ? '편집' : '추가'}
 										</button>
 										{#if port.description}
 											<button
-												class="btn-small btn-danger"
+												class="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition"
 												on:click={() => deleteDescription(port.port)}
 											>
 												삭제
@@ -268,256 +293,8 @@
 				</tbody>
 			</table>
 		</div>
-		<div class="summary">총 {filteredPorts.length}개의 포트가 열려있습니다</div>
+		<div class="mt-4 text-right text-gray-500 text-sm">
+			총 {filteredPorts.length}개의 포트가 열려있습니다
+		</div>
 	{/if}
 </div>
-
-<style>
-	.container {
-		background: white;
-		border-radius: 8px;
-		padding: 2rem;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-	}
-
-	.header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 1.5rem;
-	}
-
-	.header h2 {
-		margin: 0;
-		font-size: 1.5rem;
-		color: #2c3e50;
-	}
-
-	.actions {
-		display: flex;
-		gap: 0.5rem;
-	}
-
-	.btn-primary,
-	.btn-secondary,
-	.btn-success,
-	.btn-danger {
-		padding: 0.5rem 1rem;
-		border: none;
-		border-radius: 4px;
-		font-weight: 500;
-		cursor: pointer;
-		transition: all 0.2s;
-	}
-
-	.btn-primary {
-		background: #3498db;
-		color: white;
-	}
-
-	.btn-primary:hover:not(:disabled) {
-		background: #2980b9;
-	}
-
-	.btn-secondary {
-		background: #95a5a6;
-		color: white;
-	}
-
-	.btn-secondary:hover:not(:disabled) {
-		background: #7f8c8d;
-	}
-
-	.btn-success {
-		background: #27ae60;
-		color: white;
-	}
-
-	.btn-success:hover {
-		background: #229954;
-	}
-
-	.btn-danger {
-		background: #e74c3c;
-		color: white;
-	}
-
-	.btn-danger:hover {
-		background: #c0392b;
-	}
-
-	.btn-small {
-		padding: 0.25rem 0.75rem;
-		font-size: 0.85rem;
-	}
-
-	button:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-	}
-
-	.alert {
-		padding: 1rem;
-		border-radius: 4px;
-		margin-bottom: 1rem;
-	}
-
-	.alert.success {
-		background: #d4edda;
-		color: #155724;
-		border: 1px solid #c3e6cb;
-	}
-
-	.alert.error {
-		background: #f8d7da;
-		color: #721c24;
-		border: 1px solid #f5c6cb;
-	}
-
-	.search-box {
-		margin-bottom: 1rem;
-	}
-
-	.search-box input {
-		width: 100%;
-		padding: 0.75rem;
-		border: 1px solid #ddd;
-		border-radius: 4px;
-		font-size: 0.95rem;
-	}
-
-	.search-box input:focus {
-		outline: none;
-		border-color: #3498db;
-		box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-	}
-
-	.loading,
-	.empty {
-		text-align: center;
-		padding: 3rem;
-		color: #7f8c8d;
-	}
-
-	.table-container {
-		overflow-x: auto;
-	}
-
-	table {
-		width: 100%;
-		border-collapse: collapse;
-	}
-
-	thead {
-		background: #f8f9fa;
-	}
-
-	th {
-		text-align: left;
-		padding: 1rem;
-		font-weight: 600;
-		color: #2c3e50;
-		border-bottom: 2px solid #dee2e6;
-	}
-
-	td {
-		padding: 1rem;
-		border-bottom: 1px solid #dee2e6;
-	}
-
-	tbody tr:hover {
-		background: #f8f9fa;
-	}
-
-	tbody tr.editing {
-		background: #e8f4f8;
-	}
-
-	.port {
-		font-weight: 600;
-		font-family: 'Courier New', monospace;
-	}
-
-	.port-link {
-		background: none;
-		border: none;
-		color: #3498db;
-		cursor: pointer;
-		font-weight: 600;
-		font-family: 'Courier New', monospace;
-		font-size: 1rem;
-		padding: 0;
-		text-decoration: underline;
-		transition: color 0.2s;
-	}
-
-	.port-link:hover {
-		color: #2980b9;
-	}
-
-	.status {
-		padding: 0.25rem 0.75rem;
-		border-radius: 12px;
-		font-size: 0.85rem;
-		font-weight: 500;
-	}
-
-	.status.open {
-		background: #d4edda;
-		color: #155724;
-	}
-
-	.status.closed {
-		background: #f8d7da;
-		color: #721c24;
-	}
-
-	.description {
-		color: #555;
-		font-style: italic;
-	}
-
-	.process-name {
-		font-weight: 500;
-		color: #2c3e50;
-	}
-
-	.pid {
-		color: #7f8c8d;
-		font-size: 0.85rem;
-		margin-left: 0.25rem;
-	}
-
-	.edit-form {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-		min-width: 200px;
-	}
-
-	.edit-input {
-		padding: 0.5rem;
-		border: 1px solid #ddd;
-		border-radius: 4px;
-		font-size: 0.9rem;
-	}
-
-	.edit-input:focus {
-		outline: none;
-		border-color: #3498db;
-		box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
-	}
-
-	.action-buttons {
-		display: flex;
-		gap: 0.5rem;
-		flex-wrap: wrap;
-	}
-
-	.summary {
-		margin-top: 1rem;
-		text-align: right;
-		color: #7f8c8d;
-		font-size: 0.9rem;
-	}
-</style>

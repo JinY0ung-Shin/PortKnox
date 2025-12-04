@@ -1,4 +1,5 @@
 <script lang="ts">
+	import '../app.css';
 	import { page } from '$app/stores';
 
 	let tabs = [
@@ -7,14 +8,14 @@
 	];
 </script>
 
-<div class="app">
-	<header>
-		<h1>서버 포트 대시보드</h1>
-		<nav>
+<div class="flex flex-col min-h-screen bg-gray-100">
+	<header class="bg-slate-700 text-white px-8 shadow-md">
+		<h1 class="text-2xl font-semibold py-6 pb-4">서버 포트 대시보드</h1>
+		<nav class="flex gap-2 -mb-px">
 			{#each tabs as tab}
 				<a
 					href={tab.href}
-					class:active={$page.url.pathname === tab.href}
+					class="px-6 py-3 no-underline text-white/70 border-b-2 border-transparent transition-all font-medium hover:text-white hover:bg-white/5 {$page.url.pathname === tab.href ? 'text-white border-b-blue-500 bg-white/10' : ''}"
 				>
 					{tab.label}
 				</a>
@@ -22,75 +23,7 @@
 		</nav>
 	</header>
 
-	<main>
+	<main class="flex-1 p-8 max-w-7xl w-full mx-auto">
 		<slot />
 	</main>
 </div>
-
-<style>
-	:global(body) {
-		margin: 0;
-		padding: 0;
-		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-		background: #f5f5f5;
-		color: #333;
-	}
-
-	:global(*) {
-		box-sizing: border-box;
-	}
-
-	.app {
-		display: flex;
-		flex-direction: column;
-		min-height: 100vh;
-	}
-
-	header {
-		background: #2c3e50;
-		color: white;
-		padding: 0 2rem;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-	}
-
-	h1 {
-		margin: 0;
-		padding: 1.5rem 0 1rem;
-		font-size: 1.5rem;
-		font-weight: 600;
-	}
-
-	nav {
-		display: flex;
-		gap: 0.5rem;
-		margin-bottom: -1px;
-	}
-
-	nav a {
-		padding: 0.75rem 1.5rem;
-		text-decoration: none;
-		color: rgba(255, 255, 255, 0.7);
-		border-bottom: 2px solid transparent;
-		transition: all 0.2s;
-		font-weight: 500;
-	}
-
-	nav a:hover {
-		color: white;
-		background: rgba(255, 255, 255, 0.05);
-	}
-
-	nav a.active {
-		color: white;
-		border-bottom-color: #3498db;
-		background: rgba(255, 255, 255, 0.1);
-	}
-
-	main {
-		flex: 1;
-		padding: 2rem;
-		max-width: 1400px;
-		width: 100%;
-		margin: 0 auto;
-	}
-</style>

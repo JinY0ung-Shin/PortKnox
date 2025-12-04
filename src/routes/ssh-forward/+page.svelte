@@ -111,136 +111,160 @@
 	});
 </script>
 
-<div class="container">
-	<div class="header">
-		<h2>SSH 포트 포워딩 관리</h2>
-		<div class="actions">
-			<button on:click={() => (showForm = !showForm)} class="btn-secondary">
+<div class="bg-white rounded-lg p-8 shadow-sm">
+	<div class="flex justify-between items-center mb-6">
+		<h2 class="text-2xl font-semibold text-slate-700">SSH 포트 포워딩 관리</h2>
+		<div class="flex gap-2">
+			<button
+				on:click={() => (showForm = !showForm)}
+				class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 font-medium transition"
+			>
 				{showForm ? '취소' : '새 포워딩 추가'}
 			</button>
-			<button on:click={loadForwards} disabled={loading} class="btn-primary">
+			<button
+				on:click={loadForwards}
+				disabled={loading}
+				class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed font-medium transition"
+			>
 				{loading ? '로딩 중...' : '새로고침'}
 			</button>
 		</div>
 	</div>
 
 	{#if success}
-		<div class="alert success">{success}</div>
+		<div class="p-4 bg-green-50 text-green-800 border border-green-200 rounded mb-4">{success}</div>
 	{/if}
 
 	{#if error}
-		<div class="alert error">{error}</div>
+		<div class="p-4 bg-red-50 text-red-800 border border-red-200 rounded mb-4">{error}</div>
 	{/if}
 
 	{#if showForm}
-		<div class="form-container">
-			<h3>새 SSH 포트 포워딩 설정</h3>
+		<div class="bg-gray-50 p-6 rounded-lg mb-8">
+			<h3 class="text-xl font-semibold text-slate-700 mb-6">새 SSH 포트 포워딩 설정</h3>
 			<form on:submit|preventDefault={createForward}>
-				<div class="form-grid">
-					<div class="form-group">
-						<label for="name">설정 이름</label>
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+					<div class="flex flex-col">
+						<label for="name" class="mb-2 font-medium text-slate-700">설정 이름</label>
 						<input
 							id="name"
 							type="text"
 							bind:value={formData.name}
 							placeholder="예: Production API"
 							required
+							class="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
 						/>
 					</div>
 
-					<div class="form-group">
-						<label for="localPort">로컬 포트</label>
+					<div class="flex flex-col">
+						<label for="localPort" class="mb-2 font-medium text-slate-700">로컬 포트</label>
 						<input
 							id="localPort"
 							type="number"
 							bind:value={formData.localPort}
 							placeholder="예: 8080"
 							required
+							class="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
 						/>
 					</div>
 
-					<div class="form-group">
-						<label for="remoteHost">원격 호스트</label>
+					<div class="flex flex-col">
+						<label for="remoteHost" class="mb-2 font-medium text-slate-700">원격 호스트</label>
 						<input
 							id="remoteHost"
 							type="text"
 							bind:value={formData.remoteHost}
 							placeholder="예: localhost 또는 192.168.1.100"
 							required
+							class="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
 						/>
 					</div>
 
-					<div class="form-group">
-						<label for="remotePort">원격 포트</label>
+					<div class="flex flex-col">
+						<label for="remotePort" class="mb-2 font-medium text-slate-700">원격 포트</label>
 						<input
 							id="remotePort"
 							type="number"
 							bind:value={formData.remotePort}
 							placeholder="예: 3000"
 							required
+							class="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
 						/>
 					</div>
 
-					<div class="form-group">
-						<label for="sshHost">SSH 서버 주소</label>
+					<div class="flex flex-col">
+						<label for="sshHost" class="mb-2 font-medium text-slate-700">SSH 서버 주소</label>
 						<input
 							id="sshHost"
 							type="text"
 							bind:value={formData.sshHost}
 							placeholder="예: ssh.example.com"
 							required
+							class="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
 						/>
 					</div>
 
-					<div class="form-group">
-						<label for="sshPort">SSH 포트</label>
+					<div class="flex flex-col">
+						<label for="sshPort" class="mb-2 font-medium text-slate-700">SSH 포트</label>
 						<input
 							id="sshPort"
 							type="number"
 							bind:value={formData.sshPort}
 							placeholder="기본값: 22"
+							class="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
 						/>
 					</div>
 
-					<div class="form-group">
-						<label for="sshUser">SSH 사용자명</label>
+					<div class="flex flex-col">
+						<label for="sshUser" class="mb-2 font-medium text-slate-700">SSH 사용자명</label>
 						<input
 							id="sshUser"
 							type="text"
 							bind:value={formData.sshUser}
 							placeholder="예: ubuntu"
 							required
+							class="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
 						/>
 					</div>
 
-					<div class="form-group">
-						<label for="portDescription">포트 설명 (선택사항)</label>
+					<div class="flex flex-col">
+						<label for="portDescription" class="mb-2 font-medium text-slate-700">포트 설명 (선택사항)</label>
 						<input
 							id="portDescription"
 							type="text"
 							bind:value={formData.portDescription}
 							placeholder="예: Production API Server"
+							class="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
 						/>
-						<small>로컬 포트에 자동으로 설명이 추가됩니다</small>
+						<small class="mt-1 text-sm text-gray-500 italic">로컬 포트에 자동으로 설명이 추가됩니다</small>
 					</div>
 
-					<div class="form-group">
-						<label for="portUrl">포트 URL (선택사항)</label>
+					<div class="flex flex-col">
+						<label for="portUrl" class="mb-2 font-medium text-slate-700">포트 URL (선택사항)</label>
 						<input
 							id="portUrl"
 							type="text"
 							bind:value={formData.portUrl}
 							placeholder="예: http://localhost:8080/admin"
+							class="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
 						/>
-						<small>포트 클릭 시 이 URL로 접속합니다</small>
+						<small class="mt-1 text-sm text-gray-500 italic">포트 클릭 시 이 URL로 접속합니다</small>
 					</div>
 				</div>
 
-				<div class="form-actions">
-					<button type="submit" class="btn-primary" disabled={loading}>
+				<div class="flex gap-2 mt-6">
+					<button
+						type="submit"
+						class="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed font-medium transition"
+						disabled={loading}
+					>
 						{loading ? '생성 중...' : '포워딩 시작'}
 					</button>
-					<button type="button" class="btn-secondary" on:click={() => (showForm = false)}>
+					<button
+						type="button"
+						class="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 font-medium transition"
+						on:click={() => (showForm = false)}
+					>
 						취소
 					</button>
 				</div>
@@ -248,39 +272,44 @@
 		</div>
 	{/if}
 
-	<div class="forwards-list">
+	<div>
 		{#if loading && forwards.length === 0}
-			<div class="loading">포워딩 정보를 불러오는 중...</div>
+			<div class="text-center py-12 text-gray-500">포워딩 정보를 불러오는 중...</div>
 		{:else if forwards.length === 0}
-			<div class="empty">
-				<p>활성화된 SSH 포트 포워딩이 없습니다</p>
-				<p class="hint">새 포워딩을 추가하여 시작하세요</p>
+			<div class="text-center py-12 text-gray-500">
+				<p class="text-lg">활성화된 SSH 포트 포워딩이 없습니다</p>
+				<p class="text-sm mt-2">새 포워딩을 추가하여 시작하세요</p>
 			</div>
 		{:else}
-			<div class="cards">
+			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 				{#each forwards as forward}
-					<div class="card">
-						<div class="card-header">
-							<h3>{forward.name}</h3>
-							<span class="status {forward.status}">{forward.status === 'active' ? '활성' : '비활성'}</span>
+					<div class="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition">
+						<div class="flex justify-between items-center p-4 bg-gray-50 border-b border-gray-200">
+							<h3 class="text-lg font-semibold text-slate-700">{forward.name}</h3>
+							<span class="px-3 py-1 rounded-full text-sm font-medium {forward.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+								{forward.status === 'active' ? '활성' : '비활성'}
+							</span>
 						</div>
-						<div class="card-body">
-							<div class="info-row">
-								<span class="label">로컬:</span>
-								<span class="value">127.0.0.1:{forward.localPort}</span>
+						<div class="p-6">
+							<div class="mb-3">
+								<span class="font-medium text-gray-600">로컬:</span>
+								<span class="ml-2 text-slate-700 font-mono">127.0.0.1:{forward.localPort}</span>
 							</div>
-							<div class="info-row">
-								<span class="label">원격:</span>
-								<span class="value">{forward.remoteHost}:{forward.remotePort}</span>
+							<div class="mb-3">
+								<span class="font-medium text-gray-600">원격:</span>
+								<span class="ml-2 text-slate-700 font-mono">{forward.remoteHost}:{forward.remotePort}</span>
 							</div>
-							<div class="info-row">
-								<span class="label">SSH:</span>
-								<span class="value">{forward.sshUser}@{forward.sshHost}:{forward.sshPort}</span>
+							<div>
+								<span class="font-medium text-gray-600">SSH:</span>
+								<span class="ml-2 text-slate-700 font-mono">{forward.sshUser}@{forward.sshHost}:{forward.sshPort}</span>
 							</div>
 						</div>
-						<div class="card-footer">
+						<div class="p-4 bg-gray-50 border-t border-gray-200">
 							{#if forward.id}
-								<button on:click={() => stopForward(forward.id!)} class="btn-danger">
+								<button
+									on:click={() => stopForward(forward.id!)}
+									class="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 font-medium transition"
+								>
 									중지
 								</button>
 							{/if}
@@ -291,237 +320,3 @@
 		{/if}
 	</div>
 </div>
-
-<style>
-	.container {
-		background: white;
-		border-radius: 8px;
-		padding: 2rem;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-	}
-
-	.header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 1.5rem;
-	}
-
-	.header h2 {
-		margin: 0;
-		font-size: 1.5rem;
-		color: #2c3e50;
-	}
-
-	.actions {
-		display: flex;
-		gap: 0.5rem;
-	}
-
-	.btn-primary,
-	.btn-secondary,
-	.btn-danger {
-		padding: 0.5rem 1rem;
-		border: none;
-		border-radius: 4px;
-		font-weight: 500;
-		cursor: pointer;
-		transition: all 0.2s;
-	}
-
-	.btn-primary {
-		background: #3498db;
-		color: white;
-	}
-
-	.btn-primary:hover:not(:disabled) {
-		background: #2980b9;
-	}
-
-	.btn-secondary {
-		background: #95a5a6;
-		color: white;
-	}
-
-	.btn-secondary:hover:not(:disabled) {
-		background: #7f8c8d;
-	}
-
-	.btn-danger {
-		background: #e74c3c;
-		color: white;
-	}
-
-	.btn-danger:hover {
-		background: #c0392b;
-	}
-
-	button:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-	}
-
-	.alert {
-		padding: 1rem;
-		border-radius: 4px;
-		margin-bottom: 1rem;
-	}
-
-	.alert.success {
-		background: #d4edda;
-		color: #155724;
-		border: 1px solid #c3e6cb;
-	}
-
-	.alert.error {
-		background: #f8d7da;
-		color: #721c24;
-		border: 1px solid #f5c6cb;
-	}
-
-	.form-container {
-		background: #f8f9fa;
-		padding: 1.5rem;
-		border-radius: 8px;
-		margin-bottom: 2rem;
-	}
-
-	.form-container h3 {
-		margin: 0 0 1.5rem;
-		color: #2c3e50;
-	}
-
-	.form-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-		gap: 1rem;
-	}
-
-	.form-group {
-		display: flex;
-		flex-direction: column;
-	}
-
-	.form-group label {
-		margin-bottom: 0.5rem;
-		font-weight: 500;
-		color: #2c3e50;
-	}
-
-	.form-group input {
-		padding: 0.75rem;
-		border: 1px solid #ddd;
-		border-radius: 4px;
-		font-size: 0.95rem;
-	}
-
-	.form-group input:focus {
-		outline: none;
-		border-color: #3498db;
-		box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-	}
-
-	.form-group small {
-		margin-top: 0.25rem;
-		font-size: 0.85rem;
-		color: #7f8c8d;
-		font-style: italic;
-	}
-
-	.form-actions {
-		display: flex;
-		gap: 0.5rem;
-		margin-top: 1.5rem;
-	}
-
-	.loading,
-	.empty {
-		text-align: center;
-		padding: 3rem;
-		color: #7f8c8d;
-	}
-
-	.empty .hint {
-		font-size: 0.9rem;
-		margin-top: 0.5rem;
-	}
-
-	.cards {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-		gap: 1.5rem;
-	}
-
-	.card {
-		border: 1px solid #dee2e6;
-		border-radius: 8px;
-		overflow: hidden;
-		transition: box-shadow 0.2s;
-	}
-
-	.card:hover {
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-	}
-
-	.card-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 1rem 1.5rem;
-		background: #f8f9fa;
-		border-bottom: 1px solid #dee2e6;
-	}
-
-	.card-header h3 {
-		margin: 0;
-		font-size: 1.1rem;
-		color: #2c3e50;
-	}
-
-	.status {
-		padding: 0.25rem 0.75rem;
-		border-radius: 12px;
-		font-size: 0.85rem;
-		font-weight: 500;
-	}
-
-	.status.active {
-		background: #d4edda;
-		color: #155724;
-	}
-
-	.status.inactive {
-		background: #f8d7da;
-		color: #721c24;
-	}
-
-	.card-body {
-		padding: 1.5rem;
-	}
-
-	.info-row {
-		display: flex;
-		margin-bottom: 0.75rem;
-	}
-
-	.info-row:last-child {
-		margin-bottom: 0;
-	}
-
-	.info-row .label {
-		font-weight: 500;
-		color: #7f8c8d;
-		min-width: 60px;
-	}
-
-	.info-row .value {
-		color: #2c3e50;
-		font-family: 'Courier New', monospace;
-	}
-
-	.card-footer {
-		padding: 1rem 1.5rem;
-		background: #f8f9fa;
-		border-top: 1px solid #dee2e6;
-	}
-</style>
