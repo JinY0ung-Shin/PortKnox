@@ -133,14 +133,25 @@
 		loadPorts();
 	});
 
-	$: filteredPorts = ports.filter(
-		(p) =>
-			p.port.toString().includes(searchTerm) ||
-			p.protocol.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			(p.service && p.service.toLowerCase().includes(searchTerm.toLowerCase())) ||
-			(p.processName && p.processName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-			(p.description && p.description.toLowerCase().includes(searchTerm.toLowerCase()))
-	);
+	$: filteredPorts = ports
+		.filter(
+			(p) =>
+				p.port.toString().includes(searchTerm) ||
+				p.protocol.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				(p.service && p.service.toLowerCase().includes(searchTerm.toLowerCase())) ||
+				(p.processName && p.processName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+				(p.description && p.description.toLowerCase().includes(searchTerm.toLowerCase()))
+		)
+		.sort((a, b) => {
+			// 설명이 있는 포트를 먼저 표시
+			const aHasDesc = a.description ? 1 : 0;
+			const bHasDesc = b.description ? 1 : 0;
+			if (aHasDesc !== bHasDesc) {
+				return bHasDesc - aHasDesc; // 설명 있는 것이 먼저
+			}
+			// 설명 유무가 같으면 포트 번호로 정렬
+			return a.port - b.port;
+		});
 </script>
 
 <div class="bg-white rounded-lg p-8 shadow-sm">
