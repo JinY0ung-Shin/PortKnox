@@ -178,10 +178,10 @@
                         <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                                 <div>
                                         <h2 class="text-2xl font-semibold">포트 모니터링</h2>
-                                        <p class="text-slate-500 text-sm">서버 포트 상태를 확인하고 관리하세요.</p>
+                                        <p class="text-slate-600 text-sm">서버 포트 상태를 확인하고 관리하세요.</p>
                                 </div>
-                                <div class="text-xs text-slate-500 sm:text-right">
-                                        총 {totalPorts}개 중 <span class="font-medium text-slate-700">{filteredPorts.length}</span>개 표시
+                                <div class="text-xs text-slate-600 sm:text-right">
+                                        총 {totalPorts}개 중 <span class="font-medium text-slate-800">{filteredPorts.length}</span>개 표시
                                 </div>
                         </div>
 
@@ -190,7 +190,7 @@
                                         <label class="sr-only" for="search">검색</label>
                                         <div class="relative">
                                                 <div
-                                                        class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"
+                                                        class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500"
                                                 >
                                                         <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                                                 <path
@@ -262,16 +262,16 @@
 
                 <div class="panel grid grid-cols-2 sm:grid-cols-3 gap-2">
                         <div class="flex flex-col gap-0.5 p-2 rounded border border-slate-100">
-                                <span class="text-[11px] uppercase tracking-wide text-slate-500">전체</span>
-                                <span class="text-xl font-semibold">{totalPorts}</span>
+                                <span class="text-[11px] uppercase tracking-wide text-slate-600">전체</span>
+                                <span class="text-xl font-semibold text-slate-900">{totalPorts}</span>
                         </div>
                         <div class="flex flex-col gap-0.5 p-2 rounded border border-slate-100">
-                                <span class="text-[11px] uppercase tracking-wide text-slate-500">Open</span>
-                                <span class="text-xl font-semibold text-green-700">{openPorts}</span>
+                                <span class="text-[11px] uppercase tracking-wide text-slate-600">Open</span>
+                                <span class="text-xl font-semibold text-green-800">{openPorts}</span>
                         </div>
                         <div class="flex flex-col gap-0.5 p-2 rounded border border-slate-100">
-                                <span class="text-[11px] uppercase tracking-wide text-slate-500">설명 있음</span>
-                                <span class="text-xl font-semibold text-blue-700">{describedPorts}</span>
+                                <span class="text-[11px] uppercase tracking-wide text-slate-600">설명 있음</span>
+                                <span class="text-xl font-semibold text-blue-800">{describedPorts}</span>
                         </div>
                 </div>
         </div>
@@ -302,12 +302,12 @@
 	<!-- Data Table -->
         <div class="panel p-0 overflow-hidden">
                 {#if loading}
-                        <div class="text-center py-12 text-slate-500 text-sm flex flex-col items-center gap-3">
+                        <div class="text-center py-12 text-slate-600 text-sm flex flex-col items-center gap-3">
                                 <div class="w-8 h-8 border-4 border-slate-200 border-t-blue-500 rounded-full animate-spin"></div>
                                 <p>포트 정보를 불러오는 중입니다...</p>
                         </div>
                 {:else if filteredPorts.length === 0}
-                        <div class="text-center py-12 text-slate-500">
+                        <div class="text-center py-12 text-slate-600">
                                 <p class="text-sm">
                                         {searchTerm ? "해당 조건의 포트가 없습니다" : "표시할 포트가 없습니다"}
                                 </p>
@@ -341,7 +341,7 @@
                                                                                 {port.port}
                                                                         </button>
                                                                 </td>
-                                                                <td class="text-slate-600 font-mono text-sm">{port.protocol.toUpperCase()}</td>
+                                                                <td class="text-slate-700 font-mono text-sm">{port.protocol.toUpperCase()}</td>
                                                                 <td>
                                                                         <span
                                                                                 class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border {port.state ===
@@ -366,13 +366,13 @@
                                                                                         <span class="text-slate-900 font-medium">{port.processName}</span>
                                                                                         {#if port.pid}
                                                                                                 <span
-                                                                                                        class="text-xs text-slate-500 font-mono"
+                                                                                                        class="text-xs text-slate-600 font-mono"
                                                                                                         >PID: {port.pid}</span
                                                                                                 >
                                                                                         {/if}
                                                                                 </div>
                                                                         {:else}
-                                                                                <span class="text-slate-400">-</span>
+                                                                                <span class="text-slate-500">-</span>
                                                                         {/if}
                                                                 </td>
                                                                 <td>
@@ -395,7 +395,7 @@
                                                                                 </div>
                                                                         {:else}
                                                                                 <div class="flex flex-col gap-1 min-w-[220px]">
-                                                                                        <span class="text-slate-700 text-sm">{port.description || "-"}</span>
+                                                                                        <span class="text-slate-800 text-sm">{port.description || "-"}</span>
                                                                                         {#if port.url}
                                                                                                 <a
                                                                                                         class="text-xs text-blue-600 hover:underline truncate"
@@ -505,7 +505,7 @@
                                         </tbody>
                                 </table>
                         </div>
-                        <div class="px-3 sm:px-4 py-3 border-t border-slate-200 text-right text-slate-500 text-sm">
+                        <div class="px-3 sm:px-4 py-3 border-t border-slate-200 text-right text-slate-600 text-sm">
                                 총 {filteredPorts.length}개의 포트
                         </div>
                 {/if}
