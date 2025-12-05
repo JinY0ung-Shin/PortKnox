@@ -167,48 +167,48 @@
 		});
 </script>
 
-<div class="space-y-6">
+<div class="space-y-4">
         <!-- Header & Stats -->
-        <div class="flex flex-col md:flex-row gap-4 items-end justify-between">
-                <div>
-			<h2
-				class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-violet-400 mb-2"
-			>
-				Network Overview
-			</h2>
-			<p class="text-slate-400">
-				Monitor and manage your active server ports
-			</p>
-		</div>
+        <div class="flex flex-col md:flex-row gap-2 items-end justify-between">
+                <div class="space-y-1">
+                        <h2
+                                class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-violet-400"
+                        >
+                                Network Overview
+                        </h2>
+                        <p class="text-slate-400 text-sm">
+                                Monitor and manage your active server ports
+                        </p>
+                </div>
 
-                <div class="flex gap-3">
+                <div class="flex gap-2">
                         <div
-                                class="glass px-5 py-2.5 rounded-xl flex flex-col items-center min-w-[100px]"
+                                class="glass px-4 py-2 rounded-lg flex flex-col items-center min-w-[90px]"
                         >
-				<span
-					class="text-xs text-slate-400 uppercase tracking-wider font-semibold"
-					>Total</span
-				>
-				<span class="text-2xl font-bold text-white">{ports.length}</span
-				>
-			</div>
+                                <span
+                                        class="text-xs text-slate-400 uppercase tracking-wider font-semibold"
+                                        >Total</span
+                                >
+                                <span class="text-xl font-bold text-white leading-tight">{ports.length}</span
+                                >
+                        </div>
                         <div
-                                class="glass px-5 py-2.5 rounded-xl flex flex-col items-center min-w-[100px]"
+                                class="glass px-4 py-2 rounded-lg flex flex-col items-center min-w-[90px]"
                         >
-				<span
-					class="text-xs text-slate-400 uppercase tracking-wider font-semibold"
-					>Open</span
-				>
-				<span class="text-2xl font-bold text-green-400"
-					>{ports.filter((p) => p.state === "open").length}</span
-				>
-			</div>
-		</div>
-	</div>
+                                <span
+                                        class="text-xs text-slate-400 uppercase tracking-wider font-semibold"
+                                        >Open</span
+                                >
+                                <span class="text-xl font-bold text-green-400 leading-tight"
+                                        >{ports.filter((p) => p.state === "open").length}</span
+                                >
+                        </div>
+                </div>
+        </div>
 
 	<!-- Controls -->
         <div
-                class="glass-card flex flex-col md:flex-row gap-3 justify-between items-center"
+                class="glass-card p-3 flex flex-col md:flex-row gap-2 justify-between items-center"
         >
 		<div class="relative w-full md:w-96">
 			<div
@@ -234,7 +234,7 @@
 			/>
 		</div>
 
-		<div class="flex gap-3 w-full md:w-auto">
+                <div class="flex gap-2 w-full md:w-auto">
 			<button
 				on:click={findAvailablePort}
 				disabled={findingPort}
@@ -285,9 +285,9 @@
 
 	<!-- Notifications -->
 	{#if availablePort}
-		<div
-			class="p-4 bg-green-500/10 border border-green-500/20 text-green-200 rounded-lg flex items-center gap-3 animate-slide-up"
-		>
+                <div
+                        class="p-3 bg-green-500/10 border border-green-500/20 text-green-200 rounded-lg flex items-center gap-2 animate-slide-up"
+                >
 			<svg
 				class="h-5 w-5 text-green-400"
 				fill="none"
@@ -310,17 +310,17 @@
 	{/if}
 
 	{#if success}
-		<div
-			class="p-4 bg-green-500/10 border border-green-500/20 text-green-200 rounded-lg animate-slide-up"
-		>
+                <div
+                        class="p-3 bg-green-500/10 border border-green-500/20 text-green-200 rounded-lg animate-slide-up"
+                >
 			{success}
 		</div>
 	{/if}
 
 	{#if error}
-		<div
-			class="p-4 bg-red-500/10 border border-red-500/20 text-red-200 rounded-lg animate-slide-up"
-		>
+                <div
+                        class="p-3 bg-red-500/10 border border-red-500/20 text-red-200 rounded-lg animate-slide-up"
+                >
 			{error}
 		</div>
 	{/if}
@@ -328,62 +328,62 @@
 	<!-- Data Table -->
         <div class="glass-card overflow-hidden p-0">
                 {#if loading}
-			<div
-				class="text-center py-20 text-slate-400 flex flex-col items-center gap-4"
-			>
-				<div
-					class="w-10 h-10 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"
-				></div>
-				<p>Scanning ports...</p>
-			</div>
-		{:else if filteredPorts.length === 0}
-			<div class="text-center py-20 text-slate-400">
-				<svg
-					class="mx-auto h-12 w-12 text-slate-600 mb-4"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-					/>
-				</svg>
-				<p class="text-lg">
-					{searchTerm
-						? "No matching ports found"
-						: "No open ports detected"}
-				</p>
-			</div>
-		{:else}
+                        <div
+                                class="text-center py-14 text-slate-400 flex flex-col items-center gap-3"
+                        >
+                                <div
+                                        class="w-9 h-9 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"
+                                ></div>
+                                <p>Scanning ports...</p>
+                        </div>
+                {:else if filteredPorts.length === 0}
+                        <div class="text-center py-14 text-slate-400">
+                                <svg
+                                        class="mx-auto h-10 w-10 text-slate-600 mb-3"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                >
+                                        <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                </svg>
+                                <p class="text-base">
+                                        {searchTerm
+                                                ? "No matching ports found"
+                                                : "No open ports detected"}
+                                </p>
+                        </div>
+                {:else}
                         <div class="overflow-x-auto">
                                 <table class="w-full text-sm leading-tight">
                                         <thead>
                                                 <tr class="border-b border-white/5 bg-white/5">
                                                         <th
-                                                                class="text-left py-3 px-4 font-semibold text-slate-300"
+                                                                class="text-left py-2.5 px-3 font-semibold text-slate-300"
                                                                 >Port</th
                                                         >
                                                         <th
-                                                                class="text-left py-3 px-4 font-semibold text-slate-300"
+                                                                class="text-left py-2.5 px-3 font-semibold text-slate-300"
                                                                 >Protocol</th
                                                         >
                                                         <th
-                                                                class="text-left py-3 px-4 font-semibold text-slate-300"
+                                                                class="text-left py-2.5 px-3 font-semibold text-slate-300"
                                                                 >Status</th
                                                         >
                                                         <th
-                                                                class="text-left py-3 px-4 font-semibold text-slate-300"
+                                                                class="text-left py-2.5 px-3 font-semibold text-slate-300"
                                                                 >Process</th
                                                         >
                                                         <th
-                                                                class="text-left py-3 px-4 font-semibold text-slate-300"
+                                                                class="text-left py-2.5 px-3 font-semibold text-slate-300"
                                                                 >Description</th
                                                         >
                                                         <th
-                                                                class="text-left py-3 px-4 font-semibold text-slate-300"
+                                                                class="text-left py-2.5 px-3 font-semibold text-slate-300"
                                                                 >Actions</th
                                                         >
                                                 </tr>
@@ -396,7 +396,7 @@
 									? 'bg-blue-500/5'
 									: ''}"
 							>
-                                                                <td class="py-3 px-4">
+                                                                <td class="py-2 px-3">
                                                                         <button
 										on:click={() => openPort(port)}
 										class="font-mono text-blue-400 hover:text-blue-300 hover:underline transition-colors font-medium"
@@ -405,10 +405,10 @@
 									</button>
 								</td>
                                                                 <td
-                                                                        class="py-3 px-4 text-slate-400 font-mono text-sm"
+                                                                        class="py-2 px-3 text-slate-400 font-mono text-sm"
                                                                         >{port.protocol.toUpperCase()}</td
                                                                 >
-                                                                <td class="py-3 px-4">
+                                                                <td class="py-2 px-3">
                                                                         <span
 										class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {port.state ===
 										'open'
@@ -426,7 +426,7 @@
 											: "Closed"}
 									</span>
 								</td>
-                                                                <td class="py-3 px-4">
+                                                                <td class="py-2 px-3">
                                                                         {#if port.processName}
 										<div class="flex flex-col">
 											<span
@@ -444,7 +444,7 @@
 										<span class="text-slate-600">-</span>
 									{/if}
 								</td>
-                                                                <td class="py-3 px-4">
+                                                                <td class="py-2 px-3">
                                                                         {#if editingPort === port.port}
 										<div
 											class="flex flex-col gap-2 min-w-[200px]"
@@ -471,9 +471,9 @@
 										>
 									{/if}
 								</td>
-                                                                <td class="py-3 px-4">
+                                                                <td class="py-2 px-3">
                                                                         {#if editingPort === port.port}
-										<div class="flex gap-2">
+                                                                                <div class="flex gap-2">
 											<button
 												class="p-1.5 rounded bg-green-500/20 text-green-400 hover:bg-green-500/30 transition"
 												on:click={() =>
@@ -569,7 +569,7 @@
 				</table>
 			</div>
                         <div
-                                class="px-5 py-3 border-t border-white/5 text-right text-slate-500 text-sm"
+                                class="px-4 py-2 border-t border-white/5 text-right text-slate-500 text-sm"
                         >
                                 Showing {filteredPorts.length} ports
                         </div>
