@@ -9,6 +9,7 @@
         export let selectedAlias = "";
         export let onAliasChange: (alias: string) => void = () => {};
 
+        $: selectedEntry = availableAliases.find((alias) => alias.alias === selectedAlias);
         $: onAliasChange(selectedAlias);
 </script>
 
@@ -98,7 +99,15 @@
                                                 <option value={alias.alias}>{alias.alias} ({alias.hostName})</option>
                                         {/each}
                                 </select>
-                                <p class="text-xs text-slate-500">Loaded from ~/.ssh/config</p>
+                                <div class="space-y-1">
+                                        <p class="text-xs text-slate-500">Loaded from ~/.ssh/config</p>
+                                        {#if selectedEntry?.proxyJump}
+                                                <div class="flex items-center gap-2 text-xs text-slate-300">
+                                                        <span class="px-2 py-1 rounded-full bg-slate-800/60 text-[11px] text-blue-300">ProxyJump</span>
+                                                        <span class="font-mono text-slate-200">{selectedEntry.proxyJump}</span>
+                                                </div>
+                                        {/if}
+                                </div>
                         </div>
 
                         <div class="space-y-2">

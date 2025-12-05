@@ -15,8 +15,11 @@
                     {entry.hostName}
                     {entry.port ? `:${entry.port}` : ""}
             </p>
-            {#if entry.user}
-                    <p class="text-xs text-slate-500 mt-1">User: {entry.user}</p>
+            {#if entry.proxyJump}
+                    <div class="mt-3 flex items-center gap-2 text-xs text-slate-300">
+                            <span class="px-2 py-1 rounded-full bg-slate-800/60 text-[11px] text-blue-300">ProxyJump</span>
+                            <span class="font-mono text-slate-200">{entry.proxyJump}</span>
+                    </div>
             {/if}
         </div>
 
