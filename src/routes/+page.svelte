@@ -2,7 +2,13 @@
 	import { onMount } from "svelte";
 	import type { PortInfo } from "$lib/types";
 
-	let ports: PortInfo[] = [];
+        export let data: { hostIp?: string | null };
+
+        const hostBase = (data?.hostIp || "localhost").startsWith("http")
+                ? data.hostIp || "localhost"
+                : `http://${data?.hostIp || "localhost"}`;
+
+        let ports: PortInfo[] = [];
 	let loading = false;
 	let error = "";
 	let searchTerm = "";
@@ -61,16 +67,16 @@
 		}
 	}
 
-	function openPort(port: PortInfo) {
-		const url = port.url || `http://localhost:${port.port}`;
-		window.open(url, "_blank");
-	}
+        function openPort(port: PortInfo) {
+                const url = port.url || `${hostBase}:${port.port}`;
+                window.open(url, "_blank");
+        }
 
-	function startEditPort(port: PortInfo) {
-		editingPort = port.port;
-		editForm.description = port.description || "";
-		editForm.url = port.url || `http://localhost:${port.port}`;
-	}
+        function startEditPort(port: PortInfo) {
+                editingPort = port.port;
+                editForm.description = port.description || "";
+                editForm.url = port.url || `${hostBase}:${port.port}`;
+        }
 
 	function cancelEdit() {
 		editingPort = null;
