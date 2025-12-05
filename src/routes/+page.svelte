@@ -167,10 +167,10 @@
 		});
 </script>
 
-<div class="space-y-8">
-	<!-- Header & Stats -->
-	<div class="flex flex-col md:flex-row gap-6 items-end justify-between">
-		<div>
+<div class="space-y-6">
+        <!-- Header & Stats -->
+        <div class="flex flex-col md:flex-row gap-4 items-end justify-between">
+                <div>
 			<h2
 				class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-violet-400 mb-2"
 			>
@@ -181,10 +181,10 @@
 			</p>
 		</div>
 
-		<div class="flex gap-4">
-			<div
-				class="glass px-6 py-3 rounded-xl flex flex-col items-center min-w-[100px]"
-			>
+                <div class="flex gap-3">
+                        <div
+                                class="glass px-5 py-2.5 rounded-xl flex flex-col items-center min-w-[100px]"
+                        >
 				<span
 					class="text-xs text-slate-400 uppercase tracking-wider font-semibold"
 					>Total</span
@@ -192,9 +192,9 @@
 				<span class="text-2xl font-bold text-white">{ports.length}</span
 				>
 			</div>
-			<div
-				class="glass px-6 py-3 rounded-xl flex flex-col items-center min-w-[100px]"
-			>
+                        <div
+                                class="glass px-5 py-2.5 rounded-xl flex flex-col items-center min-w-[100px]"
+                        >
 				<span
 					class="text-xs text-slate-400 uppercase tracking-wider font-semibold"
 					>Open</span
@@ -207,9 +207,9 @@
 	</div>
 
 	<!-- Controls -->
-	<div
-		class="glass-card flex flex-col md:flex-row gap-4 justify-between items-center"
-	>
+        <div
+                class="glass-card flex flex-col md:flex-row gap-3 justify-between items-center"
+        >
 		<div class="relative w-full md:w-96">
 			<div
 				class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
@@ -326,8 +326,8 @@
 	{/if}
 
 	<!-- Data Table -->
-	<div class="glass-card overflow-hidden p-0">
-		{#if loading}
+        <div class="glass-card overflow-hidden p-0">
+                {#if loading}
 			<div
 				class="text-center py-20 text-slate-400 flex flex-col items-center gap-4"
 			>
@@ -358,58 +358,58 @@
 				</p>
 			</div>
 		{:else}
-			<div class="overflow-x-auto">
-				<table class="w-full">
-					<thead>
-						<tr class="border-b border-white/5 bg-white/5">
-							<th
-								class="text-left py-4 px-6 font-semibold text-slate-300"
-								>Port</th
-							>
-							<th
-								class="text-left py-4 px-6 font-semibold text-slate-300"
-								>Protocol</th
-							>
-							<th
-								class="text-left py-4 px-6 font-semibold text-slate-300"
-								>Status</th
-							>
-							<th
-								class="text-left py-4 px-6 font-semibold text-slate-300"
-								>Process</th
-							>
-							<th
-								class="text-left py-4 px-6 font-semibold text-slate-300"
-								>Description</th
-							>
-							<th
-								class="text-left py-4 px-6 font-semibold text-slate-300"
-								>Actions</th
-							>
-						</tr>
-					</thead>
-					<tbody class="divide-y divide-white/5">
-						{#each filteredPorts as port}
-							<tr
+                        <div class="overflow-x-auto">
+                                <table class="w-full text-sm leading-tight">
+                                        <thead>
+                                                <tr class="border-b border-white/5 bg-white/5">
+                                                        <th
+                                                                class="text-left py-3 px-4 font-semibold text-slate-300"
+                                                                >Port</th
+                                                        >
+                                                        <th
+                                                                class="text-left py-3 px-4 font-semibold text-slate-300"
+                                                                >Protocol</th
+                                                        >
+                                                        <th
+                                                                class="text-left py-3 px-4 font-semibold text-slate-300"
+                                                                >Status</th
+                                                        >
+                                                        <th
+                                                                class="text-left py-3 px-4 font-semibold text-slate-300"
+                                                                >Process</th
+                                                        >
+                                                        <th
+                                                                class="text-left py-3 px-4 font-semibold text-slate-300"
+                                                                >Description</th
+                                                        >
+                                                        <th
+                                                                class="text-left py-3 px-4 font-semibold text-slate-300"
+                                                                >Actions</th
+                                                        >
+                                                </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-white/5">
+                                                {#each filteredPorts as port}
+                                                        <tr
 								class="hover:bg-white/5 transition-colors {editingPort ===
 								port.port
 									? 'bg-blue-500/5'
 									: ''}"
 							>
-								<td class="py-4 px-6">
-									<button
+                                                                <td class="py-3 px-4">
+                                                                        <button
 										on:click={() => openPort(port)}
 										class="font-mono text-blue-400 hover:text-blue-300 hover:underline transition-colors font-medium"
 									>
 										{port.port}
 									</button>
 								</td>
-								<td
-									class="py-4 px-6 text-slate-400 font-mono text-sm"
-									>{port.protocol.toUpperCase()}</td
-								>
-								<td class="py-4 px-6">
-									<span
+                                                                <td
+                                                                        class="py-3 px-4 text-slate-400 font-mono text-sm"
+                                                                        >{port.protocol.toUpperCase()}</td
+                                                                >
+                                                                <td class="py-3 px-4">
+                                                                        <span
 										class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {port.state ===
 										'open'
 											? 'bg-green-500/10 text-green-400 border border-green-500/20'
@@ -426,8 +426,8 @@
 											: "Closed"}
 									</span>
 								</td>
-								<td class="py-4 px-6">
-									{#if port.processName}
+                                                                <td class="py-3 px-4">
+                                                                        {#if port.processName}
 										<div class="flex flex-col">
 											<span
 												class="text-slate-200 font-medium"
@@ -444,8 +444,8 @@
 										<span class="text-slate-600">-</span>
 									{/if}
 								</td>
-								<td class="py-4 px-6">
-									{#if editingPort === port.port}
+                                                                <td class="py-3 px-4">
+                                                                        {#if editingPort === port.port}
 										<div
 											class="flex flex-col gap-2 min-w-[200px]"
 										>
@@ -471,8 +471,8 @@
 										>
 									{/if}
 								</td>
-								<td class="py-4 px-6">
-									{#if editingPort === port.port}
+                                                                <td class="py-3 px-4">
+                                                                        {#if editingPort === port.port}
 										<div class="flex gap-2">
 											<button
 												class="p-1.5 rounded bg-green-500/20 text-green-400 hover:bg-green-500/30 transition"
@@ -568,11 +568,11 @@
 					</tbody>
 				</table>
 			</div>
-			<div
-				class="px-6 py-4 border-t border-white/5 text-right text-slate-500 text-sm"
-			>
-				Showing {filteredPorts.length} ports
-			</div>
-		{/if}
+                        <div
+                                class="px-5 py-3 border-t border-white/5 text-right text-slate-500 text-sm"
+                        >
+                                Showing {filteredPorts.length} ports
+                        </div>
+                {/if}
 	</div>
 </div>
