@@ -148,7 +148,7 @@
 
                 formData = {
                         ...formData,
-                        sshHost: entry.hostName,
+                        sshHost: entry.hostName || entry.alias,
                         sshPort: entry.port ?? 22,
                         sshUser: entry.user || formData.sshUser,
                 };

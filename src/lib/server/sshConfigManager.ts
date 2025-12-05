@@ -53,7 +53,7 @@ function parseEntries(lines: string[]): SSHConfigEntry[] {
                 const lowerKey = key.toLowerCase();
 
                 if (lowerKey === 'host') {
-                        if (current && current.alias && current.hostName) {
+                        if (current && current.alias) {
                                 entries.push(current);
                         }
                         current = { alias: value, hostName: '' };
@@ -99,8 +99,8 @@ function parseEntries(lines: string[]): SSHConfigEntry[] {
                 }
         }
 
-        if (current && current.alias && current.hostName) {
-            entries.push(current);
+        if (current && current.alias) {
+                entries.push(current);
         }
 
         return entries;
@@ -109,7 +109,7 @@ function parseEntries(lines: string[]): SSHConfigEntry[] {
 function sanitizeEntry(entry: SSHConfigEntry): SSHConfigEntry {
         const sanitized: SSHConfigEntry = {
                 alias: entry.alias.trim(),
-                hostName: entry.hostName.trim(),
+                hostName: entry.hostName?.trim() || undefined,
                 user: entry.user?.trim() || undefined,
                 port: entry.port && Number.isFinite(entry.port) ? entry.port : undefined,
                 identityFile: entry.identityFile?.trim() || undefined,

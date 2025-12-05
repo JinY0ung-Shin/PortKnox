@@ -96,7 +96,10 @@
                                 >
                                         <option value="">Manual entry</option>
                                         {#each availableAliases as alias}
-                                                <option value={alias.alias}>{alias.alias} ({alias.hostName})</option>
+                                                <option value={alias.alias}>
+                                                        {alias.alias}
+                                                        {alias.hostName ? ` (${alias.hostName})` : ""}
+                                                </option>
                                         {/each}
                                 </select>
                                 <div class="space-y-1">

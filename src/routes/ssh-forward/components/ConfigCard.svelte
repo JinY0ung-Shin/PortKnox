@@ -12,7 +12,7 @@
         <div class="mb-4">
             <h4 class="text-xl font-semibold text-white">{entry.alias}</h4>
             <p class="text-sm text-slate-400 font-mono">
-                    {entry.hostName}
+                    {entry.hostName || "(no HostName set)"}
                     {entry.port ? `:${entry.port}` : ""}
             </p>
             {#if entry.proxyJump}
