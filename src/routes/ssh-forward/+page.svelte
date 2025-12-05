@@ -22,7 +22,6 @@
                 sshHost: "",
                 sshPort: 22,
                 portDescription: "",
-                portUrl: "",
         };
 
         let configEntries: SSHConfigEntry[] = [];
@@ -131,12 +130,11 @@
                         remoteHost: "",
                         remotePort: 0,
                         localPort: 0,
-                        sshUser: "",
-                        sshHost: "",
-                        sshPort: 22,
-                        portDescription: "",
-                        portUrl: "",
-                };
+                sshUser: "",
+                sshHost: "",
+                sshPort: 22,
+                portDescription: "",
+        };
                 selectedAlias = "";
         }
 

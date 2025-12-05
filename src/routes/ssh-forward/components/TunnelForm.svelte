@@ -59,18 +59,6 @@
                                                 class="glass-input w-full"
                                         />
                                 </div>
-                                <div class="space-y-2">
-                                        <label for="portUrl" class="text-sm font-medium text-slate-300"
-                                                >URL (Optional)</label
-                                        >
-                                        <input
-                                                id="portUrl"
-                                                type="text"
-                                                bind:value={formData.portUrl}
-                                                placeholder="e.g. http://localhost:8080"
-                                                class="glass-input w-full"
-                                        />
-                                </div>
                         </div>
 
                         <div class="rounded-xl border border-white/5 bg-slate-900/50 p-4 space-y-4">
