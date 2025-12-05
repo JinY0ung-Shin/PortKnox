@@ -11,10 +11,12 @@
         </div>
         <div class="mb-4">
             <h4 class="text-xl font-semibold text-white">{entry.alias}</h4>
-            <p class="text-sm text-slate-400 font-mono">
-                    {entry.hostName || "(no HostName set)"}
-                    {entry.port ? `:${entry.port}` : ""}
-            </p>
+            {#if entry.hostName}
+                    <p class="text-sm text-slate-400 font-mono">
+                            {entry.hostName}
+                            {entry.port ? `:${entry.port}` : ""}
+                    </p>
+            {/if}
             {#if entry.proxyJump}
                     <div class="mt-3 flex items-center gap-2 text-xs text-slate-300">
                             <span class="px-2 py-1 rounded-full bg-slate-800/60 text-[11px] text-blue-300">ProxyJump</span>
