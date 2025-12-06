@@ -2,17 +2,19 @@
 	import type { PortInfo } from "$lib/types";
 	import { onMount } from "svelte";
 
-        export let data: { hostIp?: string | null };
+	export let data: { hostIp?: string | null };
 
-        const buildHostBase = (host?: string | null) => {
-                const target = host?.trim();
-                if (!target) return "http://localhost";
-                return target.startsWith("http") ? target.replace(/\/$/, "") : `http://${target}`;
-        };
+	const buildHostBase = (host?: string | null) => {
+		const target = host?.trim();
+		if (!target) return "http://localhost";
+		return target.startsWith("http")
+			? target.replace(/\/$/, "")
+			: `http://${target}`;
+	};
 
-        let hostBase = buildHostBase(data?.hostIp);
+	let hostBase = buildHostBase(data?.hostIp);
 
-        let ports: PortInfo[] = [];
+	let ports: PortInfo[] = [];
 	let loading = false;
 	let error = "";
 	let searchTerm = "";
@@ -71,16 +73,16 @@
 		}
 	}
 
-        function openPort(port: PortInfo) {
-                const url = `${hostBase}:${port.port}`;
-                window.open(url, "_blank");
-        }
+	function openPort(port: PortInfo) {
+		const url = `${hostBase}:${port.port}`;
+		window.open(url, "_blank");
+	}
 
-        function startEditPort(port: PortInfo) {
-                editingPort = port.port;
-                editForm.description = port.description || "";
-                editForm.author = port.author || "";
-        }
+	function startEditPort(port: PortInfo) {
+		editingPort = port.port;
+		editForm.description = port.description || "";
+		editForm.author = port.author || "";
+	}
 
 	function cancelEdit() {
 		editingPort = null;
@@ -143,11 +145,12 @@
 		}
 	}
 
-        onMount(() => {
-                const browserHost = typeof location !== "undefined" ? location.hostname : undefined;
-                hostBase = buildHostBase(data?.hostIp || browserHost || "localhost");
-                loadPorts();
-        });
+	onMount(() => {
+		const browserHost =
+			typeof location !== "undefined" ? location.hostname : undefined;
+		hostBase = buildHostBase(data?.hostIp || browserHost || "localhost");
+		loadPorts();
+	});
 
 	$: filteredPorts = ports
 		.filter(
@@ -180,20 +183,23 @@
 </script>
 
 <div class="space-y-2">
-        <!-- Header & Stats -->
-        <div class="flex flex-col md:flex-row gap-2 items-end justify-between">
-                <div>
-                        <h2 class="text-lg font-semibold text-slate-200">
-                                Network Overview
-                        </h2>
-                        <p class="text-slate-500 text-xs">
-                                {ports.length} ports ({ports.filter((p) => p.state === "open").length} open)
-                        </p>
-                </div>
-        </div>
+	<!-- Header & Stats -->
+	<div class="flex flex-col md:flex-row gap-2 items-end justify-between">
+		<div>
+			<h2 class="text-lg font-semibold text-slate-200">
+				Network Overview
+			</h2>
+			<p class="text-slate-500 text-xs">
+				{ports.length} ports ({ports.filter((p) => p.state === "open")
+					.length} open)
+			</p>
+		</div>
+	</div>
 
 	<!-- Controls -->
-        <div class="glass-card flex flex-col md:flex-row gap-2 justify-between items-center">
+	<div
+		class="glass-card flex flex-col md:flex-row gap-2 justify-between items-center"
+	>
 		<input
 			type="text"
 			placeholder="Search..."
@@ -201,7 +207,7 @@
 			class="glass-input w-full md:w-64"
 		/>
 
-                <div class="flex gap-1 w-full md:w-auto">
+		<div class="flex gap-1 w-full md:w-auto">
 			<button
 				on:click={findAvailablePort}
 				disabled={findingPort}
@@ -221,80 +227,122 @@
 
 	<!-- Notifications -->
 	{#if availablePort}
-                <div class="p-2 bg-green-900 border border-green-700 text-green-200 rounded text-sm">
+		<div
+			class="p-2 bg-green-900 border border-green-700 text-green-200 rounded text-sm"
+		>
 			Available Port: <strong>{availablePort}</strong>
 		</div>
 	{/if}
 
 	{#if success}
-                <div class="p-2 bg-green-900 border border-green-700 text-green-200 rounded text-sm">
+		<div
+			class="p-2 bg-green-900 border border-green-700 text-green-200 rounded text-sm"
+		>
 			{success}
 		</div>
 	{/if}
 
 	{#if error}
-                <div class="p-2 bg-red-900 border border-red-700 text-red-200 rounded text-sm">
+		<div
+			class="p-2 bg-red-900 border border-red-700 text-red-200 rounded text-sm"
+		>
 			{error}
 		</div>
 	{/if}
 
 	<!-- Data Table -->
-        <div class="glass-card overflow-hidden p-0">
-                {#if loading}
-                        <div class="text-center py-8 text-slate-400 text-sm">
-                                Scanning ports...
-                        </div>
-                {:else if filteredPorts.length === 0}
-                        <div class="text-center py-8 text-slate-500 text-sm">
-                                {searchTerm ? "No matching ports found" : "No open ports detected"}
-                        </div>
-                {:else}
-                        <div class="overflow-x-auto">
-                                <table class="w-full text-xs">
-                                        <thead>
-                                                <tr class="border-b border-slate-800 bg-slate-900">
-                                                        <th class="text-left py-1 px-2 font-medium text-slate-400">Port</th>
-                                                        <th class="text-left py-1 px-2 font-medium text-slate-400">Protocol</th>
-                                                        <th class="text-left py-1 px-2 font-medium text-slate-400">Status</th>
-                                                        <th class="text-left py-1 px-2 font-medium text-slate-400">Process</th>
-                                                        <th class="text-left py-1 px-2 font-medium text-slate-400">Description</th>
-                                                        <th class="text-left py-1 px-2 font-medium text-slate-400">Registrant</th>
-                                                        <th class="text-left py-1 px-2 font-medium text-slate-400">Actions</th>
-                                                </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-slate-800">
-                                                {#each filteredPorts as port}
-                                                        <tr class="hover:bg-slate-800/50 {editingPort === port.port ? 'bg-slate-800' : ''}">
-                                                                <td class="py-1 px-2">
-                                                                        <button
+	<div class="glass-card overflow-hidden p-0">
+		{#if loading}
+			<div class="text-center py-8 text-slate-400 text-sm">
+				Scanning ports...
+			</div>
+		{:else if filteredPorts.length === 0}
+			<div class="text-center py-8 text-slate-500 text-sm">
+				{searchTerm
+					? "No matching ports found"
+					: "No open ports detected"}
+			</div>
+		{:else}
+			<div class="overflow-x-auto">
+				<table class="w-full text-xs">
+					<thead>
+						<tr class="border-b border-slate-800 bg-slate-900">
+							<th
+								class="text-left py-1 px-2 font-medium text-slate-400"
+								>Port</th
+							>
+							<th
+								class="text-left py-1 px-2 font-medium text-slate-400"
+								>Protocol</th
+							>
+							<th
+								class="text-left py-1 px-2 font-medium text-slate-400"
+								>Status</th
+							>
+							<th
+								class="text-left py-1 px-2 font-medium text-slate-400"
+								>Process</th
+							>
+							<th
+								class="text-left py-1 px-2 font-medium text-slate-400"
+								>Description</th
+							>
+							<th
+								class="text-left py-1 px-2 font-medium text-slate-400"
+								>Registrant</th
+							>
+							<th
+								class="text-left py-1 px-2 font-medium text-slate-400"
+								>Actions</th
+							>
+						</tr>
+					</thead>
+					<tbody class="divide-y divide-slate-800">
+						{#each filteredPorts as port}
+							<tr
+								class="hover:bg-slate-800/50 {editingPort ===
+								port.port
+									? 'bg-slate-800'
+									: ''}"
+							>
+								<td class="py-1 px-2">
+									<button
 										on:click={() => openPort(port)}
 										class="font-mono text-blue-400 hover:underline"
 									>
 										{port.port}
 									</button>
 								</td>
-                                                                <td class="py-1 px-2 text-slate-400 font-mono">
-										{port.protocol.toUpperCase()}
+								<td class="py-1 px-2 text-slate-400 font-mono">
+									{port.protocol.toUpperCase()}
 								</td>
-                                                                <td class="py-1 px-2">
-                                                                        <span class="text-xs {port.state === 'open' ? 'text-green-400' : 'text-red-400'}">
-										{port.state === "open" ? "Active" : "Closed"}
+								<td class="py-1 px-2">
+									<span
+										class="text-xs {port.state === 'open'
+											? 'text-green-400'
+											: 'text-red-400'}"
+									>
+										{port.state === "open"
+											? "Active"
+											: "Closed"}
 									</span>
 								</td>
-                                                                <td class="py-1 px-2">
-                                                                        {#if port.processName}
+								<td class="py-1 px-2">
+									{#if port.processName}
 										<div class="text-slate-300">
 											{port.processName}
 											{#if port.pid}
-												<span class="text-slate-600">({port.pid})</span>
+												<span class="text-slate-600"
+													>({port.pid})</span
+												>
 											{/if}
 										</div>
 									{:else}
 										<span class="text-slate-600">-</span>
 									{/if}
 								</td>
-                                                                <td class="py-1 px-2">
-                                                                        {#if editingPort === port.port}
+								<td class="py-1 px-2">
+									{#if editingPort === port.port}
 										<input
 											type="text"
 											placeholder="Description"
@@ -302,11 +350,13 @@
 											class="glass-input"
 										/>
 									{:else}
-										<span class="text-slate-400">{port.description || "-"}</span>
+										<span class="text-slate-400"
+											>{port.description || "-"}</span
+										>
 									{/if}
 								</td>
-                                                                <td class="py-1 px-2">
-                                                                        {#if editingPort === port.port}
+								<td class="py-1 px-2">
+									{#if editingPort === port.port}
 										<input
 											type="text"
 											placeholder="Registrant"
@@ -314,15 +364,18 @@
 											class="glass-input"
 										/>
 									{:else}
-										<span class="text-slate-400">{port.author || "-"}</span>
+										<span class="text-slate-400"
+											>{port.author || "-"}</span
+										>
 									{/if}
 								</td>
-                                                                <td class="py-1 px-2">
-                                                                        {#if editingPort === port.port}
-                                                                                <div class="flex gap-1">
+								<td class="py-1 px-2">
+									{#if editingPort === port.port}
+										<div class="flex gap-1">
 											<button
 												class="px-1.5 py-0.5 text-xs rounded bg-green-800 text-green-200 hover:bg-green-700"
-												on:click={() => saveDescription(port.port)}
+												on:click={() =>
+													saveDescription(port.port)}
 												title="Save"
 											>
 												Save
@@ -339,7 +392,8 @@
 										<div class="flex gap-1">
 											<button
 												class="px-1.5 py-0.5 text-xs rounded bg-slate-800 text-slate-400 hover:bg-slate-700"
-												on:click={() => startEditPort(port)}
+												on:click={() =>
+													startEditPort(port)}
 												title="Edit"
 											>
 												Edit
@@ -347,7 +401,10 @@
 											{#if port.description}
 												<button
 													class="px-1.5 py-0.5 text-xs rounded bg-slate-800 text-slate-400 hover:bg-red-900 hover:text-red-300"
-													on:click={() => deleteDescription(port.port)}
+													on:click={() =>
+														deleteDescription(
+															port.port,
+														)}
 													title="Delete"
 												>
 													Del
@@ -361,9 +418,11 @@
 					</tbody>
 				</table>
 			</div>
-                        <div class="px-2 py-1 border-t border-slate-800 text-right text-slate-600 text-xs">
-                                {filteredPorts.length} ports
-                        </div>
-                {/if}
+			<div
+				class="px-2 py-1 border-t border-slate-800 text-right text-slate-600 text-xs"
+			>
+				{filteredPorts.length} ports
+			</div>
+		{/if}
 	</div>
 </div>
