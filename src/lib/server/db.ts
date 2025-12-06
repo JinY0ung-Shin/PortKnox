@@ -19,48 +19,40 @@ db.pragma('journal_mode = WAL');
 // 외래 키 제약조건 활성화
 db.pragma('foreign_keys = ON');
 
-// 테이블 생성
+// 통합 포트 테이블 생성
 db.exec(`
-	CREATE TABLE IF NOT EXISTS port_descriptions (
+	CREATE TABLE IF NOT EXISTS ports (
 		port INTEGER PRIMARY KEY,
 		description TEXT NOT NULL,
 		author TEXT,
+
+		-- SSH 터널 관련 정보 (nullable - 일반 포트는 NULL)
+		ssh_tunnel_id TEXT UNIQUE,
+		ssh_tunnel_name TEXT,
+		ssh_remote_host TEXT,
+		ssh_remote_port INTEGER,
+		ssh_local_bind_address TEXT,
+		ssh_user TEXT,
+		ssh_host TEXT,
+		ssh_port INTEGER,
+		ssh_status TEXT,
+
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);
 
-	CREATE TABLE IF NOT EXISTS ssh_tunnels (
-		id TEXT PRIMARY KEY,
-		name TEXT NOT NULL,
-		remote_host TEXT NOT NULL,
-		remote_port INTEGER NOT NULL,
-		local_port INTEGER NOT NULL,
-		local_bind_address TEXT DEFAULT '127.0.0.1',
-		ssh_user TEXT NOT NULL,
-		ssh_host TEXT NOT NULL,
-		ssh_port INTEGER DEFAULT 22,
-		author TEXT,
-		status TEXT DEFAULT 'active',
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-	);
-
-	CREATE INDEX IF NOT EXISTS idx_ssh_tunnels_local_port ON ssh_tunnels(local_port);
-	CREATE INDEX IF NOT EXISTS idx_ssh_tunnels_status ON ssh_tunnels(status);
+	-- 인덱스 생성
+	CREATE INDEX IF NOT EXISTS idx_ports_ssh_tunnel_id ON ports(ssh_tunnel_id);
+	CREATE INDEX IF NOT EXISTS idx_ports_ssh_status ON ports(ssh_status);
+	CREATE INDEX IF NOT EXISTS idx_ports_author ON ports(author);
 `);
 
 // 업데이트 트리거 생성
 db.exec(`
-	CREATE TRIGGER IF NOT EXISTS update_port_descriptions_timestamp
-	AFTER UPDATE ON port_descriptions
+	CREATE TRIGGER IF NOT EXISTS update_ports_timestamp
+	AFTER UPDATE ON ports
 	BEGIN
-		UPDATE port_descriptions SET updated_at = CURRENT_TIMESTAMP WHERE port = NEW.port;
-	END;
-
-	CREATE TRIGGER IF NOT EXISTS update_ssh_tunnels_timestamp
-	AFTER UPDATE ON ssh_tunnels
-	BEGIN
-		UPDATE ssh_tunnels SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+		UPDATE ports SET updated_at = CURRENT_TIMESTAMP WHERE port = NEW.port;
 	END;
 `);
 

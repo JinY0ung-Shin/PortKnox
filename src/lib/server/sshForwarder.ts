@@ -18,43 +18,48 @@ const MAX_RECONNECT_ATTEMPTS = 5;
 const RECONNECT_DELAY = 3000; // 3초
 
 function saveTunnel(config: SSHForwardConfig): void {
+	const description = `SSH Tunnel: ${config.name}`;
+
 	const stmt = db.prepare(`
-		INSERT INTO ssh_tunnels (
-			id, name, remote_host, remote_port, local_port,
-			local_bind_address, ssh_user, ssh_host, ssh_port, author, status
+		INSERT INTO ports (
+			port, description, author,
+			ssh_tunnel_id, ssh_tunnel_name, ssh_remote_host, ssh_remote_port,
+			ssh_local_bind_address, ssh_user, ssh_host, ssh_port, ssh_status
 		)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-		ON CONFLICT(id) DO UPDATE SET
-			name = excluded.name,
-			remote_host = excluded.remote_host,
-			remote_port = excluded.remote_port,
-			local_port = excluded.local_port,
-			local_bind_address = excluded.local_bind_address,
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		ON CONFLICT(port) DO UPDATE SET
+			description = excluded.description,
+			author = excluded.author,
+			ssh_tunnel_id = excluded.ssh_tunnel_id,
+			ssh_tunnel_name = excluded.ssh_tunnel_name,
+			ssh_remote_host = excluded.ssh_remote_host,
+			ssh_remote_port = excluded.ssh_remote_port,
+			ssh_local_bind_address = excluded.ssh_local_bind_address,
 			ssh_user = excluded.ssh_user,
 			ssh_host = excluded.ssh_host,
 			ssh_port = excluded.ssh_port,
-			author = excluded.author,
-			status = excluded.status,
+			ssh_status = excluded.ssh_status,
 			updated_at = CURRENT_TIMESTAMP
 	`);
 
 	stmt.run(
+		config.localPort,
+		description,
+		config.author || null,
 		config.id,
 		config.name,
 		config.remoteHost,
 		config.remotePort,
-		config.localPort,
 		config.localBindAddress || '127.0.0.1',
 		config.sshUser,
 		config.sshHost,
 		config.sshPort,
-		config.author || null,
 		config.status || 'active'
 	);
 }
 
 function deleteTunnel(id: string): void {
-	const stmt = db.prepare('DELETE FROM ssh_tunnels WHERE id = ?');
+	const stmt = db.prepare('DELETE FROM ports WHERE ssh_tunnel_id = ?');
 	stmt.run(id);
 }
 
@@ -62,11 +67,19 @@ function loadSavedTunnels(): SSHForwardConfig[] {
 	try {
 		const stmt = db.prepare(`
 			SELECT
-				id, name, remote_host as remoteHost, remote_port as remotePort,
-				local_port as localPort, local_bind_address as localBindAddress,
-				ssh_user as sshUser, ssh_host as sshHost, ssh_port as sshPort,
-				author, status
-			FROM ssh_tunnels
+				ssh_tunnel_id as id,
+				ssh_tunnel_name as name,
+				ssh_remote_host as remoteHost,
+				ssh_remote_port as remotePort,
+				port as localPort,
+				ssh_local_bind_address as localBindAddress,
+				ssh_user as sshUser,
+				ssh_host as sshHost,
+				ssh_port as sshPort,
+				author,
+				ssh_status as status
+			FROM ports
+			WHERE ssh_tunnel_id IS NOT NULL
 			ORDER BY created_at
 		`);
 
@@ -359,11 +372,57 @@ export async function stopSSHForward(id: string): Promise<SSHForwardResult> {
 }
 
 export function listActiveForwards(): SSHForwardConfig[] {
-	return Array.from(activeForwards.values()).map(f => f.config);
+	// 메모리의 활성 터널 정보에 DB의 최신 author/description 병합
+	return Array.from(activeForwards.values()).map(forward => {
+		try {
+			// DB에서 최신 정보 가져오기
+			const dbData = db.prepare(`
+				SELECT description, author
+				FROM ports
+				WHERE ssh_tunnel_id = ?
+			`).get(forward.config.id) as { description: string; author: string | null } | undefined;
+
+			if (dbData) {
+				// DB의 최신 author로 업데이트
+				return {
+					...forward.config,
+					author: dbData.author || undefined
+				};
+			}
+		} catch (error) {
+			console.error(`Failed to fetch latest data for tunnel ${forward.config.id}:`, error);
+		}
+
+		// DB 조회 실패 시 메모리 데이터 반환
+		return forward.config;
+	});
 }
 
 export function getForwardById(id: string): SSHForwardConfig | undefined {
-	return activeForwards.get(id)?.config;
+	const forward = activeForwards.get(id);
+	if (!forward) return undefined;
+
+	try {
+		// DB에서 최신 정보 가져오기
+		const dbData = db.prepare(`
+			SELECT description, author
+			FROM ports
+			WHERE ssh_tunnel_id = ?
+		`).get(id) as { description: string; author: string | null } | undefined;
+
+		if (dbData) {
+			// DB의 최신 author로 업데이트
+			return {
+				...forward.config,
+				author: dbData.author || undefined
+			};
+		}
+	} catch (error) {
+		console.error(`Failed to fetch latest data for tunnel ${id}:`, error);
+	}
+
+	// DB 조회 실패 시 메모리 데이터 반환
+	return forward.config;
 }
 
 export async function restoreSavedTunnels(): Promise<void> {
