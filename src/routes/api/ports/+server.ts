@@ -9,14 +9,18 @@ export const GET: RequestHandler = async () => {
 		const descriptions = getAllPortDescriptions();
 		const descriptionMap = new Map(descriptions.map((d) => [d.port, d]));
 
-		// 포트 정보에 저장된 설명 병합
+		// 포트 정보에 저장된 설명 및 LiteLLM 정보 병합
 		const portsWithDescriptions = ports.map((port) => {
 			const desc = descriptionMap.get(port.port);
 			return {
 				...port,
 				description: desc?.description,
 				author: desc?.author,
-				tags: desc?.tags
+				tags: desc?.tags,
+				litellmEnabled: desc?.litellmEnabled,
+				litellmModelId: desc?.litellmModelId,
+				litellmModelName: desc?.litellmModelName,
+				litellmApiBase: desc?.litellmApiBase
 			};
 		});
 

@@ -137,32 +137,6 @@
 		}
 	}
 
-	async function deleteDescription(port: number) {
-		if (!confirm('이 포트의 설명을 삭제하시겠습니까?')) return;
-
-		error = '';
-		success = '';
-
-		try {
-			const response = await fetch('/api/port-descriptions', {
-				method: 'DELETE',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ port })
-			});
-			const data = await response.json();
-
-			if (data.success) {
-				success = '포트 설명이 삭제되었습니다';
-				await loadPorts();
-				setTimeout(() => (success = ''), 3000);
-			} else {
-				error = data.error || '삭제에 실패했습니다';
-			}
-		} catch (e) {
-			error = '서버 연결에 실패했습니다';
-		}
-	}
-
 	onMount(() => {
 		const browserHost = typeof location !== 'undefined' ? location.hostname : undefined;
 		hostBase = buildHostBase(data?.hostIp || browserHost || 'localhost');
@@ -373,24 +347,13 @@
 											</button>
 										</div>
 									{:else}
-										<div class="flex gap-1">
-											<button
-												class="px-1.5 py-0.5 text-xs rounded bg-slate-800 text-slate-400 hover:bg-slate-700"
-												on:click={() => startEditPort(port)}
-												title="Edit"
-											>
-												Edit
-											</button>
-											{#if port.description}
-												<button
-													class="px-1.5 py-0.5 text-xs rounded bg-slate-800 text-slate-400 hover:bg-red-900 hover:text-red-300"
-													on:click={() => deleteDescription(port.port)}
-													title="Delete"
-												>
-													Del
-												</button>
-											{/if}
-										</div>
+										<button
+											class="px-1.5 py-0.5 text-xs rounded bg-slate-800 text-slate-400 hover:bg-slate-700"
+											on:click={() => startEditPort(port)}
+											title="Edit"
+										>
+											Edit
+										</button>
 									{/if}
 								</td>
 							</tr>
