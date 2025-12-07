@@ -8,6 +8,10 @@ export interface PortInfo {
 	description?: string;
 	author?: string;
 	tags?: string[]; // Array of hashtags
+	litellmEnabled?: boolean;
+	litellmModelId?: string;
+	litellmModelName?: string;
+	litellmApiBase?: string;
 }
 
 export interface PortDescription {
@@ -15,6 +19,10 @@ export interface PortDescription {
 	description?: string;
 	author?: string;
 	tags?: string[]; // Array of hashtags
+	litellmEnabled?: boolean;
+	litellmModelId?: string;
+	litellmModelName?: string;
+	litellmApiBase?: string;
 }
 
 export interface SSHForwardConfig {
@@ -30,6 +38,10 @@ export interface SSHForwardConfig {
 	status?: 'active' | 'inactive' | 'error';
 	author?: string; // 터널을 등록한 사람
 	portUrl?: string;
+	// LiteLLM 자동 등록 옵션
+	litellmEnabled?: boolean;
+	litellmModelName?: string; // 사용자 지정 모델 이름
+	litellmApiKey?: string; // LLM API 키 (선택사항)
 }
 
 export interface SSHForwardResult {
@@ -60,4 +72,30 @@ export interface SSHConfigEntry {
         forwardAgent?: boolean;
 	localForwards?: SSHLocalForward[];
 	extras?: SSHConfigExtraOption[];
+}
+
+// LiteLLM API 타입
+export interface LiteLLMModelParams {
+	model: string; // 예: "openai/gpt-3.5-turbo"
+	api_base: string; // 예: "http://localhost:8080/v1"
+	api_key?: string; // 선택사항
+}
+
+export interface LiteLLMAddModelRequest {
+	model_name: string;
+	litellm_params: LiteLLMModelParams;
+}
+
+export interface LiteLLMModel {
+	model_id?: string;
+	model_name: string;
+	litellm_params: LiteLLMModelParams;
+	model_info?: {
+		id: string;
+		db_model: boolean;
+	};
+}
+
+export interface LiteLLMDeleteModelRequest {
+	id: string;
 }

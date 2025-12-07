@@ -10,3 +10,8 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 /data
 /logs
+
+# LiteLLM Proxy
+/llm-proxy/.venv
+/llm-proxy/__pycache__
+/llm-proxy/*.pyc

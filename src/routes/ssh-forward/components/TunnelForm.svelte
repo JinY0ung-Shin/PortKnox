@@ -26,6 +26,9 @@
                 sshAlias: "SSH config 파일에 저장된 별칭을 사용하거나 수동으로 입력합니다",
                 sshHost: "SSH 접속할 서버의 주소입니다 (IP 또는 도메인)",
                 sshPort: "SSH 서버의 포트 번호입니다 (기본값: 22)",
+                litellmEnabled: "SSH 터널 생성 시 LiteLLM에 자동으로 모델을 등록합니다",
+                litellmModelName: "LiteLLM에 등록할 모델 이름입니다 (예: my-llm, gpt-custom)",
+                litellmApiKey: "원격 LLM API 키입니다 (선택사항, 필요시에만 입력)",
         };
 </script>
 
@@ -75,6 +78,71 @@
                                                 placeholder="knox-id"
                                                 class="glass-input w-full"
                                         />
+                                </div>
+                                <div class="pt-2 border-t border-slate-700">
+                                        <label
+                                                class="flex items-center gap-2 cursor-pointer"
+                                        >
+                                                <input
+                                                        type="checkbox"
+                                                        bind:checked={
+                                                                formData.litellmEnabled
+                                                        }
+                                                        class="w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-blue-500 focus:ring-offset-slate-900"
+                                                />
+                                                <span
+                                                        class="text-xs text-slate-300 flex items-center gap-1"
+                                                >
+                                                        LiteLLM 자동 등록
+                                                        <Tooltip
+                                                                text={tooltips.litellmEnabled}
+                                                        />
+                                                </span>
+                                        </label>
+                                        {#if formData.litellmEnabled}
+                                                <div class="mt-2 space-y-2">
+                                                        <div>
+                                                                <label
+                                                                        for="litellmModelName"
+                                                                        class="text-xs text-slate-400 flex items-center gap-1"
+                                                                >
+                                                                        모델 이름
+                                                                        <Tooltip
+                                                                                text={tooltips.litellmModelName}
+                                                                        />
+                                                                </label>
+                                                                <input
+                                                                        id="litellmModelName"
+                                                                        type="text"
+                                                                        bind:value={
+                                                                                formData.litellmModelName
+                                                                        }
+                                                                        placeholder="my-llm"
+                                                                        class="glass-input w-full text-xs"
+                                                                />
+                                                        </div>
+                                                        <div>
+                                                                <label
+                                                                        for="litellmApiKey"
+                                                                        class="text-xs text-slate-400 flex items-center gap-1"
+                                                                >
+                                                                        API Key (선택)
+                                                                        <Tooltip
+                                                                                text={tooltips.litellmApiKey}
+                                                                        />
+                                                                </label>
+                                                                <input
+                                                                        id="litellmApiKey"
+                                                                        type="password"
+                                                                        bind:value={
+                                                                                formData.litellmApiKey
+                                                                        }
+                                                                        placeholder="sk-..."
+                                                                        class="glass-input w-full text-xs"
+                                                                />
+                                                        </div>
+                                                </div>
+                                        {/if}
                                 </div>
                         </div>
 

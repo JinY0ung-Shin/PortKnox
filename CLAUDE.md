@@ -44,13 +44,23 @@
   - 재연결 (최대 5회, 3초 간격)
   - 서버 재시작 시 터널 복원
   - Dashboard에 자동 등록 (description + author)
+  - **LiteLLM 자동 등록**: SSH 터널 생성 시 원격 LLM을 LiteLLM Proxy에 자동 등록
 - **설정 옵션**:
   - Bind Address: localhost(127.0.0.1) 또는 모든 인터페이스(0.0.0.0)
   - SSH Config 파일 (`~/.ssh/config`) 자동 로드
+  - LiteLLM 모델 이름 및 API 키 (선택)
 - **상태 관리**:
   - active: 정상 작동
   - inactive: 재연결 중
   - error: 최대 재시도 초과
+
+### 3. LiteLLM Integration (LLM 프록시)
+- **목적**: 원격 서버의 LLM을 SSH 터널로 가져와 통합 관리
+- **Docker Compose**: PostgreSQL + LiteLLM Proxy
+- **자동 등록**: SSH 터널 생성 시 LiteLLM에 모델 자동 추가/삭제
+- **API 기반**: OpenAI 호환 API 프록시
+- **위치**: `./llm-proxy/`
+- **포트**: 4000 (LiteLLM), 5432 (PostgreSQL)
 
 ## 데이터베이스 구조
 
@@ -61,6 +71,7 @@ CREATE TABLE ports (
   port INTEGER PRIMARY KEY,
   description TEXT NOT NULL,
   author TEXT,
+  tags TEXT, -- JSON array
 
   -- SSH 터널 전용 컬럼 (nullable)
   ssh_tunnel_id TEXT UNIQUE,
@@ -72,6 +83,12 @@ CREATE TABLE ports (
   ssh_host TEXT,
   ssh_port INTEGER,
   ssh_status TEXT,
+
+  -- LiteLLM 통합 (nullable)
+  litellm_enabled BOOLEAN DEFAULT 0,
+  litellm_model_id TEXT,
+  litellm_model_name TEXT,
+  litellm_api_base TEXT,
 
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -101,14 +118,35 @@ CREATE TABLE ports (
 ## 핵심 로직
 
 ### SSH 터널 생성 흐름
-1. 사용자가 SSH Forward 폼 작성
+1. 사용자가 SSH Forward 폼 작성 (LiteLLM 옵션 포함 가능)
 2. `createSSHForward()` 호출
 3. SSH 연결 설정 (`setupSSHConnection()`)
-4. 성공 시 `saveTunnel()` → DB에 저장
-   - description: "SSH Tunnel: {name}"
-   - author: 사용자 입력값
-   - 모든 SSH 설정 저장
+4. 성공 시:
+   - **LiteLLM 자동 등록** (옵션 활성화된 경우):
+     - `addModelToLiteLLM()` 호출
+     - 모델 이름, API Base, API Key 전달
+     - LiteLLM에서 모델 ID 반환
+   - `saveTunnel()` → DB에 저장
+     - description: "SSH Tunnel: {name}"
+     - author: 사용자 입력값
+     - 모든 SSH 설정 저장
+     - LiteLLM 정보 저장 (enabled, model_id, model_name, api_base)
 5. Dashboard에서 즉시 조회 가능
+
+### LiteLLM 통합 흐름
+1. **SSH 터널 생성 시**:
+   - 사용자가 "LiteLLM 자동 등록" 체크박스 활성화
+   - 모델 이름 입력 (예: "my-llm")
+   - API 키 입력 (선택사항)
+2. **자동 등록**:
+   - SSH 터널이 성공적으로 생성되면
+   - `http://{bindAddress}:{localPort}/v1` 형식으로 API Base 생성
+   - LiteLLM API 호출하여 모델 등록
+   - DB에 LiteLLM 정보 저장
+3. **SSH 터널 중지 시**:
+   - DB에서 LiteLLM 정보 조회
+   - `deleteModelFromLiteLLM()` 호출하여 모델 삭제
+   - 터널 및 DB 레코드 삭제
 
 ### Dashboard ↔ SSH Forward 동기화
 - **Dashboard에서 author 수정** → DB 업데이트
@@ -142,7 +180,8 @@ src/
 │   │   ├── portDescriptions.ts    # 포트 설명 CRUD
 │   │   ├── portScanner.ts         # 포트 스캐닝
 │   │   ├── sshForwarder.ts        # SSH 터널 관리
-│   │   └── sshConfigManager.ts    # SSH Config 파서
+│   │   ├── sshConfigManager.ts    # SSH Config 파서
+│   │   └── litellmClient.ts       # LiteLLM API 클라이언트
 │   ├── components/
 │   │   └── Tooltip.svelte
 │   └── types.ts                   # 타입 정의
@@ -167,6 +206,13 @@ data/
 ├── dashboard.db                   # SQLite DB
 ├── dashboard.db-wal               # WAL 로그
 └── *.backup                       # 백업 파일
+
+llm-proxy/                         # LiteLLM Proxy
+├── docker-compose.yml             # Docker Compose 설정
+├── config.yaml                    # LiteLLM 설정
+├── .env                           # 환경변수
+├── .env.example                   # 환경변수 예시
+└── README.md                      # LiteLLM 사용법
 ```
 
 ## 중요 개념
@@ -259,9 +305,20 @@ sqlite3 data/dashboard.db "SELECT * FROM ports"
 - 명령어 권한 확인
 - 로그에서 에러 메시지 확인
 
+**LiteLLM 연결 안 됨**
+- Docker Compose 상태 확인: `cd llm-proxy && docker-compose ps`
+- LiteLLM 로그 확인: `docker-compose -f llm-proxy/docker-compose.yml logs -f litellm`
+- 환경변수 확인: `.env` 파일에 `LITELLM_BASE_URL`, `LITELLM_MASTER_KEY` 설정
+- 헬스체크: `curl http://localhost:4000/model/info -H "Authorization: Bearer sk-1234"`
+
 ## 개발 워크플로우
 
 ```bash
+# LiteLLM 서버 시작
+cd llm-proxy
+docker-compose up -d
+cd ..
+
 # 개발 시작
 npm run dev
 
@@ -274,6 +331,10 @@ npm run preview
 # PM2로 배포
 pm2 start npm --name "portknox" -- run preview
 pm2 save
+
+# LiteLLM 서버 중지
+cd llm-proxy
+docker-compose down
 ```
 
 ## 브랜딩 가이드
@@ -284,6 +345,15 @@ pm2 save
 - **로그 접두사**: `[PortKnox]`, `[PortKnox SSH]`, etc.
 
 ## 주요 업데이트 히스토리
+
+### 2025-12-07
+- ✅ **LiteLLM 통합 기능 추가**
+  - Docker Compose로 PostgreSQL + LiteLLM Proxy 관리
+  - SSH 터널 생성 시 LiteLLM에 자동으로 모델 등록
+  - SSH 터널 중지 시 LiteLLM에서 모델 자동 삭제
+  - DB 스키마에 LiteLLM 관련 컬럼 추가
+  - LiteLLM API 클라이언트 모듈 작성
+  - SSH Forward UI에 LiteLLM 자동 등록 옵션 추가
 
 ### 2025-12-06
 - ✅ Dashboard에 등록자(author) 컬럼 추가
@@ -298,8 +368,9 @@ pm2 save
 - [SvelteKit Docs](https://kit.svelte.dev)
 - [better-sqlite3](https://github.com/WiseLibs/better-sqlite3)
 - [ssh2 Documentation](https://github.com/mscdex/ssh2)
+- [LiteLLM Docs](https://docs.litellm.ai/)
 
 ---
 
 **작성일**: 2025-12-06
-**최종 업데이트**: 2025-12-06
+**최종 업데이트**: 2025-12-07

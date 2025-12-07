@@ -5,6 +5,7 @@ import { join } from 'path';
 import { homedir, userInfo } from 'os';
 import db from './db';
 import type { SSHForwardConfig, SSHForwardResult } from '$lib/types';
+import { addModelToLiteLLM, deleteModelFromLiteLLM } from './litellmClient';
 
 interface ActiveForward {
 	config: SSHForwardConfig;
@@ -18,19 +19,30 @@ const activeForwards = new Map<string, ActiveForward>();
 const MAX_RECONNECT_ATTEMPTS = 5;
 const RECONNECT_DELAY = 3000; // 3초
 
-function saveTunnel(config: SSHForwardConfig): void {
+function saveTunnel(config: SSHForwardConfig, litellmModelId?: string): void {
 	const description = `SSH Tunnel: ${config.name}`;
+	const bindAddress = config.localBindAddress || '127.0.0.1';
+	const apiBase = `http://${bindAddress}:${config.localPort}/v1`;
+
+	// LiteLLM이 활성화된 경우 "llm" 태그 자동 추가
+	let tags: string[] = [];
+	if (config.litellmEnabled) {
+		tags.push('llm');
+	}
+	const tagsJson = tags.length > 0 ? JSON.stringify(tags) : null;
 
 	const stmt = db.prepare(`
 		INSERT INTO ports (
-			port, description, author,
+			port, description, author, tags,
 			ssh_tunnel_id, ssh_tunnel_name, ssh_remote_host, ssh_remote_port,
-			ssh_local_bind_address, ssh_user, ssh_host, ssh_port, ssh_status
+			ssh_local_bind_address, ssh_user, ssh_host, ssh_port, ssh_status,
+			litellm_enabled, litellm_model_id, litellm_model_name, litellm_api_base
 		)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		ON CONFLICT(port) DO UPDATE SET
 			description = excluded.description,
 			author = excluded.author,
+			tags = excluded.tags,
 			ssh_tunnel_id = excluded.ssh_tunnel_id,
 			ssh_tunnel_name = excluded.ssh_tunnel_name,
 			ssh_remote_host = excluded.ssh_remote_host,
@@ -40,6 +52,10 @@ function saveTunnel(config: SSHForwardConfig): void {
 			ssh_host = excluded.ssh_host,
 			ssh_port = excluded.ssh_port,
 			ssh_status = excluded.ssh_status,
+			litellm_enabled = excluded.litellm_enabled,
+			litellm_model_id = excluded.litellm_model_id,
+			litellm_model_name = excluded.litellm_model_name,
+			litellm_api_base = excluded.litellm_api_base,
 			updated_at = CURRENT_TIMESTAMP
 	`);
 
@@ -47,15 +63,20 @@ function saveTunnel(config: SSHForwardConfig): void {
 		config.localPort,
 		description,
 		config.author || null,
+		tagsJson,
 		config.id,
 		config.name,
 		config.remoteHost,
 		config.remotePort,
-		config.localBindAddress || '127.0.0.1',
+		bindAddress,
 		config.sshUser,
 		config.sshHost,
 		config.sshPort,
-		config.status || 'active'
+		config.status || 'active',
+		config.litellmEnabled ? 1 : 0,
+		litellmModelId || null,
+		config.litellmModelName || null,
+		config.litellmEnabled ? apiBase : null
 	);
 }
 
@@ -153,7 +174,7 @@ async function reconnectSSHForward(id: string, config: SSHForwardConfig): Promis
 				currentForward.reconnectAttempts = 0;
 				currentForward.isReconnecting = false;
 				console.log(`[SSH Forward ${id}] 재연결 성공`);
-				saveTunnel(currentForward.config);
+				saveTunnel(currentForward.config); // 재연결 시에는 LiteLLM 모델 재등록 안 함
 			} else {
 				currentForward.isReconnecting = false;
 				await reconnectSSHForward(id, config);
@@ -398,7 +419,33 @@ export async function createSSHForward(config: SSHForwardConfig): Promise<SSHFor
 	const result = await setupSSHConnection(id, { ...config, id });
 
 	if (result.success) {
-		saveTunnel(result.config!);
+		let litellmModelId: string | undefined;
+
+		// LiteLLM 자동 등록
+		if (config.litellmEnabled && config.litellmModelName) {
+			const bindAddress = config.localBindAddress || '127.0.0.1';
+			const apiBase = `http://${bindAddress}:${config.localPort}/v1`;
+
+			console.log(`[PortKnox LiteLLM] Registering model: ${config.litellmModelName} at ${apiBase}`);
+
+			const litellmResult = await addModelToLiteLLM({
+				model_name: config.litellmModelName,
+				litellm_params: {
+					model: `openai/${config.litellmModelName}`,
+					api_base: apiBase,
+					api_key: config.litellmApiKey || 'dummy'
+				}
+			});
+
+			if (litellmResult.success && litellmResult.model) {
+				litellmModelId = litellmResult.model.model_info?.id || litellmResult.model.model_name;
+				console.log(`[PortKnox LiteLLM] Model registered successfully: ${litellmModelId}`);
+			} else {
+				console.error(`[PortKnox LiteLLM] Failed to register model: ${litellmResult.error}`);
+			}
+		}
+
+		saveTunnel(result.config!, litellmModelId);
 	}
 
 	return result;
@@ -415,6 +462,31 @@ export async function stopSSHForward(id: string): Promise<SSHForwardResult> {
 	}
 
 	try {
+		// LiteLLM에서 모델 삭제 (있는 경우)
+		const dbData = db.prepare(`
+			SELECT litellm_enabled, litellm_model_id, litellm_model_name, port
+			FROM ports
+			WHERE ssh_tunnel_id = ?
+		`).get(id) as { litellm_enabled: number; litellm_model_id: string | null; litellm_model_name: string | null; port: number } | undefined;
+
+		console.log(`[PortKnox SSH] Stopping tunnel ${id}, LiteLLM data:`, dbData);
+
+		if (dbData?.litellm_enabled && dbData.litellm_model_id) {
+			try {
+				console.log(`[PortKnox LiteLLM] Deleting model: ${dbData.litellm_model_id} (${dbData.litellm_model_name}) from port ${dbData.port}`);
+				const litellmResult = await deleteModelFromLiteLLM(dbData.litellm_model_id);
+				if (litellmResult.success) {
+					console.log(`[PortKnox LiteLLM] Model deleted successfully from LiteLLM`);
+				} else {
+					console.error(`[PortKnox LiteLLM] Failed to delete model from LiteLLM: ${litellmResult.error}`);
+				}
+			} catch (error) {
+				console.error(`[PortKnox LiteLLM] Exception while deleting model:`, error);
+			}
+		} else {
+			console.log(`[PortKnox LiteLLM] No LiteLLM model to delete (enabled: ${dbData?.litellm_enabled}, model_id: ${dbData?.litellm_model_id})`);
+		}
+
 		// 재연결 방지
 		forward.isReconnecting = true;
 		forward.reconnectAttempts = MAX_RECONNECT_ATTEMPTS;
@@ -539,7 +611,7 @@ export async function restoreSavedTunnels(): Promise<void> {
 				const result = await setupSSHConnection(config.id!, config);
 				if (result.success) {
 					console.log(`[PortKnox SSH] 터널 복원 성공: ${config.name}`);
-					saveTunnel(result.config!);
+					saveTunnel(result.config!); // 복원 시에는 LiteLLM 모델 재등록 안 함 (이미 DB에 있음)
 				} else {
 					console.error(`[PortKnox SSH] 터널 복원 실패: ${config.name} - ${result.message}`);
 					// 복원 실패한 터널은 재연결 시도할 수 있도록 상태 유지

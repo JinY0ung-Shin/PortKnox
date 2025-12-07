@@ -38,6 +38,12 @@ db.exec(`
 		ssh_port INTEGER,
 		ssh_status TEXT,
 
+		-- LiteLLM 관련 정보 (nullable - LiteLLM에 등록하지 않은 경우 NULL)
+		litellm_enabled BOOLEAN DEFAULT 0,
+		litellm_model_id TEXT,
+		litellm_model_name TEXT,
+		litellm_api_base TEXT, -- http://localhost:{port}/v1 형식
+
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);
@@ -56,6 +62,24 @@ db.exec(`
 		UPDATE ports SET updated_at = CURRENT_TIMESTAMP WHERE port = NEW.port;
 	END;
 `);
+
+// LiteLLM 컬럼 마이그레이션 (기존 DB에 컬럼이 없는 경우 추가)
+try {
+	const columns = db.pragma('table_info(ports)').map((col: any) => col.name);
+
+	if (!columns.includes('litellm_enabled')) {
+		console.log('[PortKnox] Adding LiteLLM columns to ports table...');
+		db.exec(`
+			ALTER TABLE ports ADD COLUMN litellm_enabled BOOLEAN DEFAULT 0;
+			ALTER TABLE ports ADD COLUMN litellm_model_id TEXT;
+			ALTER TABLE ports ADD COLUMN litellm_model_name TEXT;
+			ALTER TABLE ports ADD COLUMN litellm_api_base TEXT;
+		`);
+		console.log('[PortKnox] LiteLLM columns added successfully');
+	}
+} catch (error) {
+	console.error('[PortKnox] Error adding LiteLLM columns:', error);
+}
 
 console.log(`[PortKnox] SQLite database initialized at ${DB_PATH}`);
 
