@@ -19,11 +19,14 @@ function saveTunnel(config: SSHForwardConfig, litellmModelId?: string): void {
 	const bindAddress = config.localBindAddress || '127.0.0.1';
 	const apiBase = `http://${bindAddress}:${config.localPort}/v1`;
 
-	let tags: string[] = [];
+	const normalizedTags = Array.isArray(config.tags)
+		? config.tags.filter((tag): tag is string => Boolean(tag))
+		: [];
+	const tags = new Set(normalizedTags);
 	if (config.litellmEnabled) {
-		tags.push('llm');
+		tags.add('llm');
 	}
-	const tagsJson = tags.length > 0 ? JSON.stringify(tags) : null;
+	const tagsJson = tags.size > 0 ? JSON.stringify([...tags]) : null;
 
 	const stmt = db.prepare(`
 		INSERT INTO ports (
