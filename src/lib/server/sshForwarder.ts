@@ -2,7 +2,7 @@ import type { SSHForwardConfig, SSHForwardResult } from '$lib/types';
 import { spawn, type ChildProcess } from 'child_process';
 import { createConnection } from 'net';
 import db from './db';
-import { addModelToLiteLLM, deleteModelFromLiteLLM } from './litellmClient';
+import { addModelToLiteLLM, deleteModelFromLiteLLM, listLiteLLMModels } from './litellmClient';
 interface ActiveForward {
 	config: SSHForwardConfig;
 	process: ChildProcess;
@@ -384,28 +384,46 @@ export async function createSSHForward(config: SSHForwardConfig): Promise<SSHFor
 	if (result.success) {
 		let litellmModelId: string | undefined;
 
-		if (config.litellmEnabled && config.litellmModelName) {
-			const bindAddress = config.localBindAddress || '127.0.0.1';
-			const apiBase = `http://${bindAddress}:${config.localPort}/v1`;
+                if (config.litellmEnabled && config.litellmModelName) {
+                        const bindAddress = config.localBindAddress || '127.0.0.1';
+                        const apiBase = `http://${bindAddress}:${config.localPort}/v1`;
 
-			console.log(`[PortKnox LiteLLM] Registering model: ${config.litellmModelName} at ${apiBase}`);
+                        const litellmModels = await listLiteLLMModels();
+                        const existingModel =
+                                litellmModels.success && litellmModels.models
+                                        ? litellmModels.models.find(
+                                                  (model) =>
+                                                          model.model_name === config.litellmModelName ||
+                                                          model.model_id === config.litellmModelId ||
+                                                          model.model_info?.id === config.litellmModelId
+                                          )
+                                        : undefined;
 
-			const litellmResult = await addModelToLiteLLM({
-				model_name: config.litellmModelName,
-				litellm_params: {
-					model: `openai/${config.litellmModelName}`,
-					api_base: apiBase,
-					api_key: config.litellmApiKey || 'dummy',
-				},
-			});
+                        if (existingModel) {
+                                litellmModelId = existingModel.model_info?.id || existingModel.model_id || existingModel.model_name;
+                                console.log(
+                                        `[PortKnox LiteLLM] Model already registered, skipping create: ${litellmModelId}`
+                                );
+                        } else {
+                                console.log(`[PortKnox LiteLLM] Registering model: ${config.litellmModelName} at ${apiBase}`);
 
-			if (litellmResult.success && litellmResult.model) {
-				litellmModelId = litellmResult.model.model_info?.id || litellmResult.model.model_name;
-				console.log(`[PortKnox LiteLLM] Model registered successfully: ${litellmModelId}`);
-			} else {
-				console.error(`[PortKnox LiteLLM] Failed to register model: ${litellmResult.error}`);
-			}
-		}
+                                const litellmResult = await addModelToLiteLLM({
+                                        model_name: config.litellmModelName,
+                                        litellm_params: {
+                                                model: `openai/${config.litellmModelName}`,
+                                                api_base: apiBase,
+                                                api_key: config.litellmApiKey || 'dummy',
+                                        },
+                                });
+
+                                if (litellmResult.success && litellmResult.model) {
+                                        litellmModelId = litellmResult.model.model_info?.id || litellmResult.model.model_name;
+                                        console.log(`[PortKnox LiteLLM] Model registered successfully: ${litellmModelId}`);
+                                } else {
+                                        console.error(`[PortKnox LiteLLM] Failed to register model: ${litellmResult.error}`);
+                                }
+                        }
+                }
 
 		saveTunnel(result.config!, litellmModelId);
 	}
@@ -586,29 +604,50 @@ export async function restoreSavedTunnels(): Promise<void> {
                                                         const bindAddress = config.localBindAddress || '127.0.0.1';
                                                         const apiBase = `http://${bindAddress}:${config.localPort}/v1`;
 
-                                                        console.log(
-                                                                `[PortKnox LiteLLM] Restoring model: ${config.litellmModelName} at ${apiBase}`
-                                                        );
+                                                        const litellmModels = await listLiteLLMModels();
+                                                        const existingModel =
+                                                                litellmModels.success && litellmModels.models
+                                                                        ? litellmModels.models.find(
+                                                                                  (model) =>
+                                                                                          model.model_name === config.litellmModelName ||
+                                                                                          model.model_id === config.litellmModelId ||
+                                                                                          model.model_info?.id === config.litellmModelId
+                                                                          )
+                                                                        : undefined;
 
-                                                        const litellmResult = await addModelToLiteLLM({
-                                                                model_name: config.litellmModelName,
-                                                                litellm_params: {
-                                                                        model: `openai/${config.litellmModelName}`,
-                                                                        api_base: apiBase,
-                                                                        api_key: config.litellmApiKey || 'dummy',
-                                                                },
-                                                        });
-
-                                                        if (litellmResult.success && litellmResult.model) {
+                                                        if (existingModel) {
                                                                 litellmModelId =
-                                                                        litellmResult.model.model_info?.id || litellmResult.model.model_name;
+                                                                        existingModel.model_info?.id ||
+                                                                        existingModel.model_id ||
+                                                                        existingModel.model_name;
                                                                 console.log(
-                                                                        `[PortKnox LiteLLM] Model restored successfully: ${litellmModelId}`
+                                                                        `[PortKnox LiteLLM] Model already registered, skipping restore: ${litellmModelId}`
                                                                 );
                                                         } else {
-                                                                console.error(
-                                                                        `[PortKnox LiteLLM] Failed to restore model: ${litellmResult.error}`
+                                                                console.log(
+                                                                        `[PortKnox LiteLLM] Restoring model: ${config.litellmModelName} at ${apiBase}`
                                                                 );
+
+                                                                const litellmResult = await addModelToLiteLLM({
+                                                                        model_name: config.litellmModelName,
+                                                                        litellm_params: {
+                                                                                model: `openai/${config.litellmModelName}`,
+                                                                                api_base: apiBase,
+                                                                                api_key: config.litellmApiKey || 'dummy',
+                                                                        },
+                                                                });
+
+                                                                if (litellmResult.success && litellmResult.model) {
+                                                                        litellmModelId =
+                                                                                litellmResult.model.model_info?.id || litellmResult.model.model_name;
+                                                                        console.log(
+                                                                                `[PortKnox LiteLLM] Model restored successfully: ${litellmModelId}`
+                                                                        );
+                                                                } else {
+                                                                        console.error(
+                                                                                `[PortKnox LiteLLM] Failed to restore model: ${litellmResult.error}`
+                                                                        );
+                                                                }
                                                         }
                                                 }
 
