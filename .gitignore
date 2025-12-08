@@ -15,3 +15,5 @@ vite.config.ts.timestamp-*
 /llm-proxy/.venv
 /llm-proxy/__pycache__
 /llm-proxy/*.pyc
+
+**/*.log

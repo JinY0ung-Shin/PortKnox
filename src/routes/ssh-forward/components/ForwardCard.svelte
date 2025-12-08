@@ -22,30 +22,22 @@
 
         async function checkHealth() {
                 healthStatus = 'checking';
-                healthMessage = '';
-
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 5000);
-
+                
                 try {
-                        const response = await fetch(healthUrl, {
-                                method: 'GET',
-                                cache: 'no-store',
-                                signal: controller.signal,
-                        });
-
-                        if (response.ok) {
-                                healthStatus = 'healthy';
-                                healthMessage = 'Healthy (200 OK)';
+                        // 백엔드 API를 통해 체크
+                        const response = await fetch(`/api/health-check?port=${forward.localPort}`);
+                        const data = await response.json();
+                        
+                        if (data.healthy) {
+                        healthStatus = 'healthy';
+                        healthMessage = 'Healthy (200 OK)';
                         } else {
-                                healthStatus = 'unhealthy';
-                                healthMessage = `Unhealthy (${response.status} ${response.statusText})`;
+                        healthStatus = 'unhealthy';
+                        healthMessage = data.message;
                         }
                 } catch (error) {
                         healthStatus = 'error';
                         healthMessage = error instanceof Error ? error.message : 'Unknown error';
-                } finally {
-                        clearTimeout(timeout);
                 }
         }
 </script>
