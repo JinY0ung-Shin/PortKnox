@@ -1,10 +1,10 @@
-import { Client } from 'ssh2';
-import { createServer, type Server } from 'net';
-import { readFileSync, existsSync } from 'fs';
-import { join } from 'path';
-import { homedir, userInfo } from 'os';
-import db from './db';
 import type { SSHForwardConfig, SSHForwardResult } from '$lib/types';
+import { existsSync, readFileSync } from 'fs';
+import { createServer, type Server } from 'net';
+import { homedir, userInfo } from 'os';
+import { join } from 'path';
+import { Client } from 'ssh2';
+import db from './db';
 import { addModelToLiteLLM, deleteModelFromLiteLLM } from './litellmClient';
 
 interface ActiveForward {
@@ -381,7 +381,8 @@ async function setupSSHConnection(id: string, config: SSHForwardConfig): Promise
 				tryKeyboard: true,
 				readyTimeout: 10000,
 				keepaliveInterval: 10000, // 10초마다 keepalive
-				keepaliveCountMax: 3
+				keepaliveCountMax: 3,
+				hostVerifier: () => true  // StrictHostKeyChecking=no와 동일
 			};
 
 			// SSH agent 사용 (Windows의 경우 pageant, Unix의 경우 SSH_AUTH_SOCK)

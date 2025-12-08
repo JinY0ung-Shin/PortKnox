@@ -69,6 +69,7 @@ export interface SSHConfigEntry {
 	port?: number;
 	identityFile?: string;
 	proxyJump?: string;
+	strictHostKeyChecking?: 'yes' | 'no' | 'accept-new';
 	forwardAgent?: boolean;
 	localForwards?: SSHLocalForward[];
 	extras?: SSHConfigExtraOption[];

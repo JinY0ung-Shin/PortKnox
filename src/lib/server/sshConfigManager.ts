@@ -1,8 +1,8 @@
+import type { SSHConfigEntry, SSHLocalForward } from '$lib/types';
 import { existsSync } from 'fs';
 import { readFile } from 'fs/promises';
 import { homedir } from 'os';
 import { join } from 'path';
-import type { SSHConfigEntry, SSHLocalForward } from '$lib/types';
 
 const SSH_DIR = join(homedir(), '.ssh');
 export const SSH_CONFIG_PATH = join(SSH_DIR, 'config');
@@ -114,6 +114,7 @@ function sanitizeEntry(entry: SSHConfigEntry): SSHConfigEntry {
 		port: entry.port && Number.isFinite(entry.port) ? entry.port : undefined,
 		identityFile: entry.identityFile?.trim() || undefined,
 		proxyJump: entry.proxyJump?.trim() || undefined,
+		strictHostKeyChecking: 'no', 
 		forwardAgent: entry.forwardAgent ?? true,
 		localForwards: entry.localForwards
 			?.map((f) => ({
