@@ -651,20 +651,37 @@ export async function restoreSavedTunnels(): Promise<void> {
                         while (attempt < MAX_RESTORE_ATTEMPTS && !restored) {
                                 attempt++;
                                 try {
-                                        const result = await setupSSHConnection(config.id!, config);
-                                        if (result.success) {
-                                                console.log(`[PortKnox SSH] 터널 복원 성공: ${config.name}`);
-                                                const bindAddress = config.localBindAddress || '127.0.0.1';
-                                                const apiBase = `http://${bindAddress}:${config.localPort}/v1`;
-                                                const litellmModelId = await ensureModelRegistered(
-                                                        config,
-                                                        apiBase,
-                                                        config.litellmModelId
-                                                );
+                                const result = await setupSSHConnection(config.id!, config);
+                                if (result.success) {
+                                        console.log(`[PortKnox SSH] 터널 복원 성공: ${config.name}`);
+                                        const bindAddress = config.localBindAddress || '127.0.0.1';
+                                        const apiBase = `http://${bindAddress}:${config.localPort}/v1`;
+                                        const shouldRegisterLiteLLM =
+                                                config.litellmEnabled && Boolean(config.litellmModelName);
 
-                                                saveTunnel(result.config!, litellmModelId);
-                                                restored = true;
+                                        if (shouldRegisterLiteLLM) {
+                                                console.log(
+                                                        `[PortKnox LiteLLM] Restore: ensuring model for tunnel ${config.name} (id: ${config.id}) with modelName=${config.litellmModelName}, existingId=${config.litellmModelId}, apiBase=${apiBase}`
+                                                );
                                         } else {
+                                                console.log(
+                                                        `[PortKnox LiteLLM] Restore: skipping LiteLLM registration for tunnel ${config.name} (id: ${config.id}) - enabled=${config.litellmEnabled}, modelName=${config.litellmModelName}`
+                                                );
+                                        }
+
+                                        const litellmModelId = shouldRegisterLiteLLM
+                                                ? await ensureModelRegistered(config, apiBase, config.litellmModelId)
+                                                : config.litellmModelId;
+
+                                        if (shouldRegisterLiteLLM) {
+                                                console.log(
+                                                        `[PortKnox LiteLLM] Restore: registration result for ${config.name} (id: ${config.id}) - registeredId=${litellmModelId}`
+                                                );
+                                        }
+
+                                        saveTunnel(result.config!, litellmModelId);
+                                        restored = true;
+                                } else {
                                                 console.error(
                                                         `[PortKnox SSH] 터널 복원 실패 (시도 ${attempt}/${MAX_RESTORE_ATTEMPTS}): ${config.name} - ${result.message}`
                                                 );
