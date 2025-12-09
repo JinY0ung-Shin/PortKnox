@@ -81,6 +81,78 @@ try {
 	console.error('[PortKnox] Error adding LiteLLM columns:', error);
 }
 
+// URL Monitoring tables
+db.exec(`
+	CREATE TABLE IF NOT EXISTS url_monitors (
+		id TEXT PRIMARY KEY,
+		name TEXT NOT NULL,
+		url TEXT NOT NULL,
+		check_interval INTEGER DEFAULT 60000,
+		timeout INTEGER DEFAULT 5000,
+		email_recipients TEXT NOT NULL,
+		enabled BOOLEAN DEFAULT 1,
+
+		status TEXT DEFAULT 'unknown',
+		consecutive_failures INTEGER DEFAULT 0,
+		last_check_at DATETIME,
+		last_success_at DATETIME,
+		last_failure_at DATETIME,
+		last_status_code INTEGER,
+		last_error_message TEXT,
+
+		author TEXT,
+		tags TEXT,
+
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	);
+
+	CREATE INDEX IF NOT EXISTS idx_monitors_enabled ON url_monitors(enabled);
+	CREATE INDEX IF NOT EXISTS idx_monitors_status ON url_monitors(status);
+	CREATE INDEX IF NOT EXISTS idx_monitors_author ON url_monitors(author);
+
+	CREATE TABLE IF NOT EXISTS monitor_history (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		monitor_id TEXT NOT NULL,
+		checked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		healthy BOOLEAN NOT NULL,
+		status_code INTEGER,
+		response_time_ms INTEGER,
+		error_message TEXT,
+
+		FOREIGN KEY (monitor_id) REFERENCES url_monitors(id) ON DELETE CASCADE
+	);
+
+	CREATE INDEX IF NOT EXISTS idx_history_monitor_id ON monitor_history(monitor_id);
+	CREATE INDEX IF NOT EXISTS idx_history_checked_at ON monitor_history(checked_at);
+
+	CREATE TABLE IF NOT EXISTS alarm_history (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		monitor_id TEXT NOT NULL,
+		alarm_type TEXT NOT NULL,
+		sent_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		recipients TEXT NOT NULL,
+		email_sent BOOLEAN DEFAULT 0,
+		error_message TEXT,
+
+		FOREIGN KEY (monitor_id) REFERENCES url_monitors(id) ON DELETE CASCADE
+	);
+
+	CREATE INDEX IF NOT EXISTS idx_alarms_monitor_id ON alarm_history(monitor_id);
+	CREATE INDEX IF NOT EXISTS idx_alarms_sent_at ON alarm_history(sent_at);
+`);
+
+// Update triggers for monitors
+db.exec(`
+	CREATE TRIGGER IF NOT EXISTS update_monitors_timestamp
+	AFTER UPDATE ON url_monitors
+	BEGIN
+		UPDATE url_monitors SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+	END;
+`);
+
+console.log('[PortKnox] URL monitoring tables initialized');
+
 console.log(`[PortKnox] SQLite database initialized at ${DB_PATH}`);
 
 export default db;

@@ -1,9 +1,36 @@
 import { restoreSavedTunnels } from '$lib/server/sshForwarder';
+import { initializeEmailService } from '$lib/server/monitoring/emailService';
+import { startMonitoringScheduler } from '$lib/server/monitoring/scheduler';
+import type { EmailConfig } from '$lib/types';
 
-// 서버 시작 시 저장된 SSH 터널 복원
-restoreSavedTunnels().catch((error) => {
-	console.error('Failed to restore SSH tunnels:', error);
-});
+// 서버 초기화
+(async () => {
+	try {
+		// 저장된 SSH 터널 복원
+		await restoreSavedTunnels();
+
+		// 이메일 서비스 초기화
+		const emailConfig: EmailConfig = {
+			host: process.env.SMTP_HOST || 'smtp.gmail.com',
+			port: parseInt(process.env.SMTP_PORT || '587'),
+			secure: process.env.SMTP_SECURE === 'true',
+			user: process.env.SMTP_USER || '',
+			password: process.env.SMTP_PASSWORD || '',
+			from: process.env.SMTP_FROM || 'PortKnox <noreply@portknox.dev>'
+		};
+
+		if (emailConfig.user && emailConfig.password) {
+			initializeEmailService(emailConfig);
+
+			// 모니터링 스케줄러 시작
+			startMonitoringScheduler();
+		} else {
+			console.log('[PortKnox Monitor] Email not configured - monitoring disabled');
+		}
+	} catch (error) {
+		console.error('[PortKnox] Initialization error:', error);
+	}
+})();
 
 // 전역 에러 핸들러 - SSH 연결 에러로 인한 서버 크래시 방지
 process.on('uncaughtException', (error) => {
