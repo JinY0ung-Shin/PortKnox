@@ -37,6 +37,14 @@
 						>
 							SSH Forwarding
 						</a>
+						<a
+							href="/monitors"
+							class="px-2 py-1 rounded {$page.url.pathname === '/monitors'
+								? 'bg-slate-800 text-white'
+								: 'text-slate-400 hover:text-slate-200'}"
+						>
+							Monitors
+						</a>
 					</div>
 				</div>
 			</div>

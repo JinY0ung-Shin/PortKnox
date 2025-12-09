@@ -103,3 +103,66 @@ export interface LiteLLMModel {
 export interface LiteLLMDeleteModelRequest {
 	id: string;
 }
+
+// URL Monitoring & Alarm types
+export interface UrlMonitor {
+	id: string;
+	name: string;
+	url: string;
+	checkInterval: number; // milliseconds
+	timeout: number; // milliseconds
+	emailRecipients: string[]; // array of email addresses
+	enabled: boolean;
+
+	// Status
+	status: 'healthy' | 'unhealthy' | 'unknown';
+	consecutiveFailures: number;
+	lastCheckAt?: Date;
+	lastSuccessAt?: Date;
+	lastFailureAt?: Date;
+	lastStatusCode?: number;
+	lastErrorMessage?: string;
+
+	// Metadata
+	author?: string;
+	tags?: string[];
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+export interface MonitorCheckResult {
+	healthy: boolean;
+	statusCode?: number;
+	responseTimeMs: number;
+	errorMessage?: string;
+	checkedAt: Date;
+}
+
+export interface MonitorHistory {
+	id: number;
+	monitorId: string;
+	checkedAt: Date;
+	healthy: boolean;
+	statusCode?: number;
+	responseTimeMs: number;
+	errorMessage?: string;
+}
+
+export interface AlarmHistory {
+	id: number;
+	monitorId: string;
+	alarmType: 'unhealthy' | 'recovered';
+	sentAt: Date;
+	recipients: string[];
+	emailSent: boolean;
+	errorMessage?: string;
+}
+
+export interface EmailConfig {
+	host: string;
+	port: number;
+	secure: boolean;
+	user: string;
+	password: string;
+	from: string;
+}
